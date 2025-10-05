@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import { Card } from '../ui/components/Card';
+import { Card } from '@/ui/components/Card';
 
 export function About() {
   const features = [

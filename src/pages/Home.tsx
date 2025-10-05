@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRightIcon, SparklesIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
-import { Button } from '../ui/components/Button';
-import { Card, CardTitle, CardDescription, CardContent } from '../ui/components/Card';
+import { Button } from '@/ui/components/Button';
+import { Card, CardTitle, CardDescription, CardContent } from '@/ui/components/Card';
 
 export function Home() {
   return (

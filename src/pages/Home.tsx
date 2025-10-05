@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRightIcon, SparklesIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
+import { Button } from '../ui/components/Button';
+import { Card, CardTitle, CardDescription, CardContent } from '../ui/components/Card';
 
 export function Home() {
   return (
@@ -23,22 +25,22 @@ export function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/about"
-              className="btn-primary inline-flex items-center justify-center space-x-2"
-            >
-              <span>Learn More</span>
-              <ArrowRightIcon className="w-4 h-4" />
+            <Link to="/about">
+              <Button className="inline-flex items-center space-x-2">
+                <span>Learn More</span>
+                <ArrowRightIcon className="w-4 h-4" />
+              </Button>
             </Link>
             
             <a
               href="https://github.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary inline-flex items-center justify-center space-x-2"
             >
-              <CodeBracketIcon className="w-4 h-4" />
-              <span>View Source</span>
+              <Button variant="secondary" className="inline-flex items-center space-x-2">
+                <CodeBracketIcon className="w-4 h-4" />
+                <span>View Source</span>
+              </Button>
             </a>
           </div>
         </div>
@@ -50,35 +52,41 @@ export function Home() {
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="card text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <SparklesIcon className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">React 18</h3>
-              <p className="text-gray-600">
-                Latest React features with TypeScript for type safety and better developer experience.
-              </p>
-            </div>
+            <Card className="text-center">
+              <CardContent>
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <SparklesIcon className="w-6 h-6 text-blue-600" />
+                </div>
+                <CardTitle>React 18</CardTitle>
+                <CardDescription>
+                  Latest React features with TypeScript for type safety and better developer experience.
+                </CardDescription>
+              </CardContent>
+            </Card>
             
-            <div className="card text-center">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <CodeBracketIcon className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Vite</h3>
-              <p className="text-gray-600">
-                Lightning-fast build tool and development server for optimal performance.
-              </p>
-            </div>
+            <Card className="text-center">
+              <CardContent>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <CodeBracketIcon className="w-6 h-6 text-green-600" />
+                </div>
+                <CardTitle>Vite</CardTitle>
+                <CardDescription>
+                  Lightning-fast build tool and development server for optimal performance.
+                </CardDescription>
+              </CardContent>
+            </Card>
             
-            <div className="card text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <SparklesIcon className="w-6 h-6 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Tailwind CSS</h3>
-              <p className="text-gray-600">
-                Utility-first CSS framework for rapid UI development with beautiful designs.
-              </p>
-            </div>
+            <Card className="text-center">
+              <CardContent>
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <SparklesIcon className="w-6 h-6 text-purple-600" />
+                </div>
+                <CardTitle>Tailwind CSS</CardTitle>
+                <CardDescription>
+                  Utility-first CSS framework for rapid UI development with beautiful designs.
+                </CardDescription>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { Card } from '../ui/components/Card';
 
 export function About() {
   const features = [
@@ -28,7 +29,7 @@ export function About() {
         </div>
 
         {/* About Content */}
-        <div className="card">
+        <Card>
           <h1 className="text-4xl font-bold text-gray-900 mb-6">
             About Web App V2
           </h1>
@@ -79,7 +80,7 @@ export function About() {
               linted with ESLint for consistent code quality.
             </p>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

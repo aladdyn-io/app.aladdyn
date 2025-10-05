@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { HomeIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { cn } from '../utils/cn';
 
 export function Navbar() {
   const location = useLocation();
@@ -26,22 +27,24 @@ export function Navbar() {
           <div className="flex items-center space-x-8">
             <Link
               to="/"
-              className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={cn(
+                'flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                 isActive('/')
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
+              )}
             >
               <HomeIcon className="w-4 h-4" />
               <span>Home</span>
             </Link>
             <Link
               to="/about"
-              className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={cn(
+                'flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                 isActive('/about')
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
+              )}
             >
               <InformationCircleIcon className="w-4 h-4" />
               <span>About</span>

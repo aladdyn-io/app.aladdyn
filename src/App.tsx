@@ -7,9 +7,16 @@ import {
   Notifications, 
   Profile, 
   Settings,
-  Login
+  Login,
+  GenieDashboard,
+  GenieAnalytics,
+  GeniePlayground,
+  LeadTrack,
+  TrainGenie,
+  GenieSettings
 } from '@/pages';
-import { SidebarLayout } from '@/ui/layouts/SidebarLayout';
+import { HomeSidebarLayout } from '@/ui/layouts/HomeSidebarLayout';
+import { GenieSidebarLayout } from '@/ui/layouts/GenieSidebarLayout';
 
 function App() {
   return (
@@ -18,9 +25,9 @@ function App() {
         {/* Login page without layout */}
         <Route path="/login" element={<Login />} />
         
-        {/* Dashboard pages with sidebar layout */}
-        <Route path="/*" element={
-          <SidebarLayout>
+        {/* Home section with HomeSidebarLayout */}
+        <Route path="/home/*" element={
+          <HomeSidebarLayout>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/analytics" element={<Analytics />} />
@@ -30,8 +37,28 @@ function App() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/about" element={<About />} />
             </Routes>
-          </SidebarLayout>
+          </HomeSidebarLayout>
         } />
+        
+        {/* Genie section with GenieSidebarLayout */}
+        <Route path="/genie/*" element={
+          <GenieSidebarLayout>
+            <Routes>
+              <Route path="/" element={<GenieDashboard />} />
+              <Route path="/analytics" element={<GenieAnalytics />} />
+              <Route path="/playground" element={<GeniePlayground />} />
+              <Route path="/leads" element={<LeadTrack />} />
+              <Route path="/leads/mail" element={<LeadTrack />} />
+              <Route path="/leads/whatsapp" element={<LeadTrack />} />
+              <Route path="/leads/instagram" element={<LeadTrack />} />
+              <Route path="/train" element={<TrainGenie />} />
+              <Route path="/settings" element={<GenieSettings />} />
+            </Routes>
+          </GenieSidebarLayout>
+        } />
+        
+        {/* Default redirect to home */}
+        <Route path="/" element={<HomeSidebarLayout><Dashboard /></HomeSidebarLayout>} />
       </Routes>
     </Router>
   );

@@ -1,12 +1,24 @@
 // Main pages
-export { Home } from './Home';
-export { About } from './About';
+export { Home } from './Landing';
 export { Login } from './Login';
 
-// Dashboard pages
-export { Dashboard } from './dashboard';
-export { Analytics } from './analytics';
-export { Documents } from './documents';
-export { Notifications } from './notifications';
-export { Profile } from './profile';
-export { Settings } from './settings';
+// Home section pages
+export { 
+  Dashboard, 
+  Analytics, 
+  Documents, 
+  Notifications, 
+  Profile, 
+  Settings, 
+  About 
+} from './home';
+
+// Genie pages
+export { 
+  GenieDashboard, 
+  GenieAnalytics, 
+  GeniePlayground, 
+  LeadTrack, 
+  TrainGenie, 
+  GenieSettings 
+} from './genie';

@@ -72,20 +72,15 @@ export function Login() {
               <p className="text-sm text-emerald-600 font-medium">AI-Powered Generative Tools</p>
             </div>
           </div>
-          <h2 className="text-4xl font-bold text-slate-900 mb-2 animate-fade-in" style={{animationDelay: '0.2s'}}>
-            Ready to Begin?
-          </h2>
-          <p className="text-slate-600 text-lg animate-fade-in" style={{animationDelay: '0.3s'}}>
-            Just enter your email and password - we'll take care of the rest
-          </p>
+
         </div>
 
         {/* Login Form Card */}
         <Card className="bg-white/80 backdrop-blur-lg border-slate-200 shadow-2xl animate-fade-in" style={{animationDelay: '0.4s'}}>
           <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl font-bold text-slate-900">Ready to Begin?</CardTitle>
+            <CardTitle className="text-2xl font-bold text-slate-900">Sign in to Aladdyn</CardTitle>
             <CardDescription className="text-slate-600">
-              New here? We'll create your account. Already a member? We'll sign you right in. No hassle, no confusion.
+              Sign in or create your account in a single step—just enter your email and password to access your AI workspace.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -213,14 +208,14 @@ export function Login() {
               </div>
             </div>
 
-            <div className="mt-8 text-center">
+            {/* <div className="mt-8 text-center">
               <p className="text-sm text-slate-600">
                 Don't have an account?{' '}
                 <Link to="/" className="font-medium text-emerald-600 hover:text-emerald-500 transition-colors">
                   Start your free trial
                 </Link>
               </p>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 

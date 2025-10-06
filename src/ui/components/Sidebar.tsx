@@ -73,7 +73,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   function SidebarContent() {
     return (
-      <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-white to-emerald-50 px-6 pb-4 shadow-xl border-r border-emerald-100">
+      <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-white to-emerald-50 px-6 shadow-xl border-r border-emerald-100">
         <div className="flex h-16 shrink-0 items-center border-b border-emerald-100">
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-800 rounded-xl flex items-center justify-center shadow-lg ring-2 ring-emerald-200 ring-opacity-50">
@@ -115,6 +115,8 @@ export function Sidebar({ className }: SidebarProps) {
                 ))}
               </ul>
             </li>
+          </ul>
+
             {/* Usage Component */}
             <div className="px-0 py-6 border-t border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100 -mx-6">
               <div className="px-6 space-y-4">
@@ -141,7 +143,6 @@ export function Sidebar({ className }: SidebarProps) {
                         className="bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 h-3 rounded-full transition-all duration-500 ease-out shadow-lg relative overflow-hidden" 
                         style={{ width: '85%' }}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
                       </div>
                     </div>
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -168,7 +169,6 @@ export function Sidebar({ className }: SidebarProps) {
                 </div>
               </div>
             </div>
-          </ul>
         </nav>
       </div>
     );

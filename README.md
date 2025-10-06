@@ -1,17 +1,18 @@
-# Web App V2
+# Aladdyn
 
-A modern, clean, and fast web application built with React, TypeScript, and Tailwind CSS.
+AI-Powered Generative Tools platform built with cutting-edge technologies and modern design principles.
 
 ## Features
 
+- 🤖 **AI-Powered Tools** - Generative AI solutions and intelligent workflows
 - ⚡️ **Vite** - Lightning-fast build tool and development server
 - ⚛️ **React 18** - Latest React features with hooks and concurrent rendering
 - 🔷 **TypeScript** - Type safety and better developer experience
-- 🎨 **Tailwind CSS** - Utility-first CSS framework for rapid UI development
+- 🎨 **Tailwind CSS** - Utility-first CSS framework with emerald gradient theme
 - 🧭 **React Router** - Declarative routing for React applications
 - 🔧 **ESLint & Prettier** - Code quality and formatting tools
 - 📱 **Responsive Design** - Mobile-first approach with beautiful UI
-- 🎯 **Modern UI Components** - Clean, accessible components with Heroicons
+- 🎯 **Modern UI Components** - Clean, accessible components with shadcn/ui
 
 ## Getting Started
 

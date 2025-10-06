@@ -5,23 +5,23 @@ import { Card, CardTitle, CardDescription, CardContent } from '@/ui/components/C
 
 export function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Hero Section */}
         <div className="text-center">
           <div className="flex justify-center mb-8">
-            <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <SparklesIcon className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl flex items-center justify-center shadow-lg p-4">
+              <img src="/gene.png" alt="Aladdyn" className="w-full h-full object-contain" />
             </div>
           </div>
           
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Welcome to Web App V2
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent mb-6">
+            Welcome to Aladdyn
           </h1>
           
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            A modern, clean, and fast web application built with React, TypeScript, 
-            and Tailwind CSS. Ready to be customized for your next project.
+            AI-Powered Generative Tools platform built with cutting-edge technologies. 
+            Create, manage, and deploy intelligent solutions with ease.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -4,14 +4,15 @@ import { Card } from '@/ui/components/Card';
 
 export function About() {
   const features = [
-    'React 18 with TypeScript',
-    'Vite for fast development',
-    'Tailwind CSS for styling',
-    'React Router for navigation',
-    'ESLint & Prettier for code quality',
-    'Responsive design',
-    'Modern UI components',
-    'Clean project structure'
+    'AI-Powered Generative Tools',
+    'Modern React 18 with TypeScript',
+    'Lightning-fast Vite development',
+    'Beautiful Tailwind CSS styling',
+    'Intuitive React Router navigation',
+    'Code quality with ESLint & Prettier',
+    'Fully responsive design',
+    'Professional UI components',
+    'Clean, scalable architecture'
   ];
 
   return (
@@ -30,15 +31,20 @@ export function About() {
 
         {/* About Content */}
         <Card>
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">
-            About Web App V2
-          </h1>
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl flex items-center justify-center">
+              <img src="/gene.png" alt="Aladdyn" className="w-full h-full object-contain" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">
+              About Aladdyn
+            </h1>
+          </div>
           
           <div className="prose prose-lg max-w-none">
             <p className="text-gray-600 mb-6">
-              This is a modern, production-ready web application template built with 
-              the latest technologies and best practices. It provides a solid foundation 
-              for building scalable React applications.
+              Aladdyn is a cutting-edge AI-powered platform that provides generative tools 
+              and intelligent solutions. Built with modern technologies and best practices, 
+              it delivers a seamless experience for creating, managing, and deploying AI-driven applications.
             </p>
             
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">

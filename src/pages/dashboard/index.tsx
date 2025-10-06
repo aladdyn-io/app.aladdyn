@@ -1,6 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/components/Card';
-import { Badge } from '@/ui/components/Badge';
-import { Button } from '@/ui/components/Button';
+import { Card, CardContent } from '@/ui/components/Card';
 import { 
   ChartBarIcon, 
   DocumentTextIcon, 
@@ -46,9 +44,9 @@ export function Dashboard() {
     <div className="space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">Dashboard</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Welcome back! Here's what's happening with your app today.
+          Welcome to Aladdyn! Here's what's happening with your AI-powered tools today.
         </p>
       </div>
 
@@ -92,62 +90,6 @@ export function Dashboard() {
         ))}
       </div>
 
-      {/* Recent activity */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Latest updates and changes in your application
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { action: 'User login', time: '2 minutes ago', status: 'success' },
-                { action: 'Document uploaded', time: '5 minutes ago', status: 'info' },
-                { action: 'Settings updated', time: '1 hour ago', status: 'warning' },
-                { action: 'New user registered', time: '2 hours ago', status: 'success' },
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Badge variant={activity.status as any}>
-                      {activity.status}
-                    </Badge>
-                    <span className="text-sm text-gray-900">{activity.action}</span>
-                  </div>
-                  <span className="text-sm text-gray-500">{activity.time}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
-              Common tasks and shortcuts
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <Button className="w-full justify-start">
-                <DocumentTextIcon className="h-4 w-4 mr-2" />
-                Create Document
-              </Button>
-              <Button variant="secondary" className="w-full justify-start">
-                <UsersIcon className="h-4 w-4 mr-2" />
-                Add User
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <ChartBarIcon className="h-4 w-4 mr-2" />
-                View Analytics
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

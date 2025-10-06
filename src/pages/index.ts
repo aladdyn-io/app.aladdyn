@@ -1,6 +1,7 @@
 // Main pages
 export { Home } from './Home';
 export { About } from './About';
+export { Login } from './Login';
 
 // Dashboard pages
 export { Dashboard } from './dashboard';

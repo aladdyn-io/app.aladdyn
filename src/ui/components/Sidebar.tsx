@@ -76,10 +76,10 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 shadow-lg">
         <div className="flex h-16 shrink-0 items-center">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">W</span>
+            <div className="w-9 h-9 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center">
+              <img src="/gene.png" alt="Aladdyn" className="w-8 h-8 object-contain" />
             </div>
-            <span className="text-xl font-semibold text-gray-900">Web App V2</span>
+            <span className="text-xl font-semibold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">Aladdyn</span>
           </div>
         </div>
         <nav className="flex flex-1 flex-col">
@@ -92,16 +92,16 @@ export function Sidebar({ className }: SidebarProps) {
                       to={item.href}
                       className={cn(
                         isCurrentPath(item.href)
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-700 hover:text-blue-700 hover:bg-blue-50',
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'text-gray-700 hover:text-emerald-700 hover:bg-emerald-50',
                         'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors'
                       )}
                     >
                       <item.icon
                         className={cn(
                           isCurrentPath(item.href)
-                            ? 'text-blue-700'
-                            : 'text-gray-400 group-hover:text-blue-700',
+                            ? 'text-emerald-700'
+                            : 'text-gray-400 group-hover:text-emerald-700',
                           'h-6 w-6 shrink-0'
                         )}
                         aria-hidden="true"

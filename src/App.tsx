@@ -8,6 +8,8 @@ import {
   Profile, 
   Settings,
   Login,
+  Onboarding,
+  Preview,
   GenieDashboard,
   GenieAnalytics,
   GeniePlayground,
@@ -24,6 +26,12 @@ function App() {
       <Routes>
         {/* Login page without layout */}
         <Route path="/login" element={<Login />} />
+        
+        {/* Onboarding page without layout */}
+        <Route path="/onboarding" element={<Onboarding />} />
+        
+        {/* Preview page without layout */}
+        <Route path="/preview/:url" element={<Preview />} />
         
         {/* Home section with HomeSidebarLayout */}
         <Route path="/home/*" element={

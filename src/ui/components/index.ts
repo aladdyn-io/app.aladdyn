@@ -4,6 +4,7 @@ export { Navbar } from './Navbar';
 export { Footer } from './Footer';
 export { Sidebar, SidebarToggle } from './Sidebar';
 export { Input } from './Input';
+export { Label } from './Label';
 export { Modal } from './Modal';
 export { Table, TableHeader, TableBody, TableRow, TableCell } from './Table';
 export { Badge } from './Badge';

@@ -1,6 +1,8 @@
 // Main pages
 export { Home } from './Landing';
 export { Login } from './Login';
+export { Onboarding } from './Onboarding';
+export { Preview } from './Preview';
 
 // Home section pages
 export { 

@@ -1,4 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/components/Card';
+import { DashboardContainer } from '../../components/analytics';
+import EventsView from '../../components/analytics/EventsView';
+import SessionsView from '../../components/analytics/SessionsView';
+import ReportsView from '../../components/analytics/ReportsView';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/components/Tabs';
 
 export function GenieAnalytics() {
   return (
@@ -10,16 +14,27 @@ export function GenieAnalytics() {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Umami Analytics Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-96 bg-gray-50 rounded-lg flex items-center justify-center">
-            <p className="text-gray-500">Umami analytics integration coming soon...</p>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
+          <TabsTrigger value="sessions">Sessions</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview">
+          <DashboardContainer />
+        </TabsContent>
+
+        <TabsContent value="events">
+          <EventsView />
+        </TabsContent>
+        <TabsContent value="sessions">
+          <SessionsView />
+        </TabsContent>
+        <TabsContent value="reports">
+          <ReportsView />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -8,7 +8,8 @@ import {
   PlayIcon,
   UserGroupIcon,
   AcademicCapIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 interface GenieSidebarLayoutProps {
@@ -23,6 +24,7 @@ const genieNavigation = [
   { name: 'Lead Track', href: '/genie/leads', icon: UserGroupIcon },
   { name: 'Chat Logs', href: '/genie/chatlogs', icon: ChatBubbleLeftRightIcon },
   { name: 'Train Genie', href: '/genie/train', icon: AcademicCapIcon },
+  { name: 'Scripts', href: '/genie/scripts', icon: DocumentTextIcon },
   { name: 'Settings', href: '/genie/settings', icon: Cog6ToothIcon },
 ];
 

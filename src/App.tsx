@@ -15,6 +15,7 @@ import {
   GeniePlayground,
   LeadTrack,
   TrainGenie,
+  GenieScripts,
   GenieSettings,
   ChatLogs
 } from '@/pages';
@@ -62,6 +63,7 @@ function App() {
               <Route path="/leads/instagram" element={<LeadTrack />} />
               <Route path="/chatlogs" element={<ChatLogs />} />
               <Route path="/train" element={<TrainGenie />} />
+              <Route path="/scripts" element={<GenieScripts />} />
               <Route path="/settings" element={<GenieSettings />} />
             </Routes>
           </GenieSidebarLayout>

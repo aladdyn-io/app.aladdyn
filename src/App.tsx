@@ -15,7 +15,8 @@ import {
   GeniePlayground,
   LeadTrack,
   TrainGenie,
-  GenieSettings
+  GenieSettings,
+  ChatLogs
 } from '@/pages';
 import { HomeSidebarLayout } from '@/ui/layouts/HomeSidebarLayout';
 import { GenieSidebarLayout } from '@/ui/layouts/GenieSidebarLayout';
@@ -59,6 +60,7 @@ function App() {
               <Route path="/leads/mail" element={<LeadTrack />} />
               <Route path="/leads/whatsapp" element={<LeadTrack />} />
               <Route path="/leads/instagram" element={<LeadTrack />} />
+              <Route path="/chatlogs" element={<ChatLogs />} />
               <Route path="/train" element={<TrainGenie />} />
               <Route path="/settings" element={<GenieSettings />} />
             </Routes>

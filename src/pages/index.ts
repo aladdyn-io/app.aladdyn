@@ -22,5 +22,6 @@ export {
   GeniePlayground, 
   LeadTrack, 
   TrainGenie, 
-  GenieSettings 
+  GenieSettings,
+  ChatLogs 
 } from './genie';

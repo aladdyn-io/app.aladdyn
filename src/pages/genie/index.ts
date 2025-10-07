@@ -5,3 +5,4 @@ export { GeniePlayground } from './playground';
 export { LeadTrack } from './leads';
 export { TrainGenie } from './train';
 export { GenieSettings } from './settings';
+export { ChatLogs } from './chatlogs';

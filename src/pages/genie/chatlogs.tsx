@@ -1,6 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
+interface Message {
+  message_id: string;
+  sender_id: string;
+  text: string;
+  timestamp: string;
+}
+
+interface Conversation {
+  conversation_id: string;
+  title: string;
+  source: string;
+  created_at: string;
+  messages: Message[];
+}
+
 const chatData = {
   "conversations": [
     {
@@ -58,7 +73,7 @@ const getSourceColor = (source: string) => {
 };
 
 export function ChatLogs() {
-  const [selectedConversation, setSelectedConversation] = useState<any>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

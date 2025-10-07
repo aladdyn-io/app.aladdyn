@@ -500,7 +500,7 @@ export function Onboarding() {
                     </p>
                   </div>
                   
-                  <div className="max-w-xl mx-auto space-y-4">
+                  <div className=" mx-auto space-y-4">
                     <div>
                       <Label htmlFor="custom-website" className="text-sm font-medium text-gray-700">
                         Enter your website URL
@@ -519,34 +519,34 @@ export function Onboarding() {
 
                     <div>
                       <Label className="text-sm font-medium text-gray-700">Select a pre-configured website</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                         {SAMPLE_WEBSITES.map((site) => (
                           <Card
                             key={site.id}
-                            className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                              selectedWebsite === site.id ? 'ring-2 ring-emerald-500 bg-emerald-50' : ''
+                            className={`cursor-pointer transition-all hover:shadow-md py-0 ${
+                              selectedWebsite === site.id ? 'ring-2 ring-primary bg-primary/5 brightness-90' : ''
                             }`}
                             onClick={() => handleWebsiteSelect(site.id)}
                           >
                             <CardContent className="p-0">
-                              <div className="relative h-32">
+                              <div className="relative" style={{ aspectRatio: '5088/3852' }}>
                                 <img
                                   src={site.image}
                                   alt={site.name}
                                   className="w-full h-full object-cover rounded-t-lg"
                                 />
                                 <div className="absolute top-2 right-2">
-                                  <span className="px-2 py-1 text-xs bg-black/80 text-white rounded font-medium">
+                                  <span className="px-2 py-1 text-xs bg-black/70 text-white rounded">
                                     {site.type}
                                   </span>
                                 </div>
                               </div>
                               <div className="p-4">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <Globe className="w-4 h-4 text-emerald-600" />
-                                  <span className="font-medium text-sm">{site.name}</span>
+                                  <Globe className="w-4 h-4" />
+                                  <span className="font-medium">{site.name}</span>
                                 </div>
-                                <p className="text-xs text-gray-600">{site.url}</p>
+                                <p className="text-sm text-muted-foreground">{site.url}</p>
                               </div>
                             </CardContent>
                           </Card>

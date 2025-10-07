@@ -35,7 +35,16 @@ const mockAnalyticsData = [
  * Note: Requires 'react-svg-worldmap' package
  * Install with: npm install react-svg-worldmap
  */
-export default function WorldMapComponent({ data = mockAnalyticsData }) {
+interface CountryData {
+  country: string;
+  value: number;
+}
+
+interface WorldMapProps {
+  data?: CountryData[];
+}
+
+export default function WorldMapComponent({ data = mockAnalyticsData }: WorldMapProps) {
   return (
     <div className="w-full">
       <div className="overflow-hidden border border-gray-200 bg-white rounded-lg p-6 shadow-sm">

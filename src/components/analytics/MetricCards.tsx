@@ -25,7 +25,19 @@ const mockMetrics = [
  *   }
  * ]
  */
-export default function MetricCards({ metrics = mockMetrics }) {
+interface Metric {
+  id: string;
+  title: string;
+  value: number | string;
+  subtitle: string;
+  delta: string | null;
+}
+
+interface MetricCardsProps {
+  metrics?: Metric[];
+}
+
+export default function MetricCards({ metrics = mockMetrics }: MetricCardsProps) {
   const getDeltaColor = (delta: string | null) => {
     if (!delta) return '';
     if (delta.startsWith('+')) return 'text-emerald-600 bg-emerald-50';

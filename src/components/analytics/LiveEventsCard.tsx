@@ -23,7 +23,18 @@ const mockEvents = [
  *   }
  * ]
  */
-export default function LiveEventsCard({ events = mockEvents }) {
+interface Event {
+  id: number;
+  type: string;
+  time: string;
+  payload: Record<string, any>;
+}
+
+interface LiveEventsCardProps {
+  events?: Event[];
+}
+
+export default function LiveEventsCard({ events = mockEvents }: LiveEventsCardProps) {
   const [isLive, setIsLive] = useState(true);
 
   useEffect(() => {
@@ -48,7 +59,7 @@ export default function LiveEventsCard({ events = mockEvents }) {
     }
   };
 
-  const getEventDescription = (event: any) => {
+  const getEventDescription = (event: Event) => {
     switch (event.type) {
       case 'pageview':
         return `Viewed ${event.payload?.path || 'page'}`;

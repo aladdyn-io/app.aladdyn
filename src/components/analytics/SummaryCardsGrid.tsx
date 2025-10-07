@@ -1,5 +1,38 @@
 
 
+import type { ReactNode } from 'react';
+
+// Type definitions
+interface PageItem {
+  path: string;
+  count: number;
+}
+
+interface CountryItem {
+  name: string;
+  count: number;
+}
+
+interface ReferrerItem {
+  name: string;
+  count: number;
+}
+
+type SummaryItem = PageItem | CountryItem | ReferrerItem;
+
+interface SummaryCardProps {
+  title: string;
+  items: SummaryItem[];
+  icon: ReactNode;
+}
+
+interface SummaryCardsGridProps {
+  pages?: PageItem[];
+  countries?: CountryItem[];
+  referrers?: ReferrerItem[];
+  maxItems?: number;
+}
+
 // Mock data for demo purposes
 const mockPages = [
   { path: '/dashboard', count: 45 },
@@ -39,19 +72,19 @@ export default function SummaryCardsGrid({
   countries = mockCountries, 
   referrers = mockReferrers,
   maxItems = 5 
-}) {
-  const SummaryCard = ({ title, items, icon }: any) => (
+}: SummaryCardsGridProps) {
+  const SummaryCard = ({ title, items, icon }: SummaryCardProps) => (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         <div className="text-gray-400">{icon}</div>
       </div>
       <div className="space-y-3">
-        {items.slice(0, maxItems).map((item: any, index: number) => (
+        {items.slice(0, maxItems).map((item: SummaryItem, index: number) => (
           <div key={index} className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
-                {item.path || item.name}
+                {'path' in item ? item.path : item.name}
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -60,7 +93,7 @@ export default function SummaryCardsGrid({
                 <div 
                   className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
                   style={{ 
-                    width: `${Math.min((item.count / Math.max(...items.map((i: any) => i.count))) * 100, 100)}%` 
+                    width: `${Math.min((item.count / Math.max(...items.map((i: SummaryItem) => i.count))) * 100, 100)}%` 
                   }}
                 ></div>
               </div>

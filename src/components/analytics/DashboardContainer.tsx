@@ -107,6 +107,28 @@ const transformUmamiData = (data: UmamiData) => {
     return deltaNum > 0 ? `+${delta}%` : `${delta}%`;
   };
 
+  // Country code mapping
+  const countryNames: Record<string, string> = {
+    'IN': 'India',
+    'US': 'United States',
+    'GB': 'United Kingdom',
+    'CA': 'Canada',
+    'DE': 'Germany',
+    'AU': 'Australia',
+    'FR': 'France',
+    'JP': 'Japan',
+    'BR': 'Brazil',
+    'CN': 'China',
+    'ES': 'Spain',
+    'IT': 'Italy',
+    'NL': 'Netherlands',
+    'SE': 'Sweden',
+    'NO': 'Norway'
+  };
+
+  // Calculate total visitors for percentage
+  const totalCountryVisits = data.topMetrics.countries.reduce((sum: number, country: UmamiMetric) => sum + country.y, 0);
+
   return {
     metrics: [
       { id: 'pageviews', title: 'Page Views', value: data.stats.pageviews.value, subtitle: 'Total page views', delta: calculateDelta(data.stats.pageviews.value, data.stats.pageviews.prev) },
@@ -118,7 +140,17 @@ const transformUmamiData = (data: UmamiData) => {
     pages: data.topMetrics.urls.map((url: UmamiMetric) => ({ path: url.x || 'Direct', count: url.y })),
     countries: data.topMetrics.countries.map((country: UmamiMetric) => ({ name: country.x || 'Unknown', count: country.y })),
     referrers: data.topMetrics.referrers.map((ref: UmamiMetric) => ({ name: ref.x || 'Direct', count: ref.y })),
-    worldMapData: data.topMetrics.countries.map((country: UmamiMetric) => ({ country: (country.x || 'unknown').toLowerCase(), value: country.y })),
+    worldMapData: data.topMetrics.countries.map((country: UmamiMetric) => {
+      const code = (country.x || 'unknown').toLowerCase();
+      const value = country.y;
+      const percentage = Math.round((value / totalCountryVisits) * 100);
+      return {
+        country: countryNames[country.x || ''] || country.x || 'Unknown',
+        code,
+        value,
+        percentage
+      };
+    }),
     hourlyData: data.timeseries.pageviews.map((item: UmamiTimeSeries) => ({ 
       hour: new Date(item.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), 
       visitors: data.timeseries.sessions.find((s: UmamiTimeSeries) => s.x === item.x)?.y || 0, 
@@ -163,7 +195,7 @@ interface DashboardData {
   pages: Array<{ path: string; count: number }>;
   countries: Array<{ name: string; count: number }>;
   referrers: Array<{ name: string; count: number }>;
-  worldMapData: Array<{ country: string; value: number }>;
+  worldMapData: Array<{ country: string; code: string; value: number; percentage: number }>;
   events: Array<{
     id: number;
     type: string;

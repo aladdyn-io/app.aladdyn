@@ -1,4 +1,4 @@
-import React from 'react';
+
 import LiveEventsCard from './LiveEventsCard';
 
 export default function RealtimeView() {

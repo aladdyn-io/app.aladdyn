@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 // Mock data for demo purposes
@@ -46,12 +46,12 @@ const mockData = [
  * Install with: npm install recharts
  */
 export default function HourlyLineChart({ data = mockData }) {
-  const CustomTooltip = ({ active, payload, label }) => {
+  const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
           <p className="text-sm font-medium text-gray-900">{`Time: ${label}`}</p>
-          {payload.map((entry, index) => (
+          {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {`${entry.name}: ${entry.value}`}
             </p>
@@ -85,7 +85,7 @@ export default function HourlyLineChart({ data = mockData }) {
               tickLine={false}
               axisLine={false}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={CustomTooltip} />
             <Legend />
             <Line 
               type="monotone" 

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import MetricCards from './MetricCards';
 import HourlyLineChart from './HourlyLineChart';
 import SummaryCardsGrid from './SummaryCardsGrid';
@@ -68,11 +68,12 @@ const umamiSampleData = {
 };
 
 // Transform Umami data to component format
-const transformUmamiData = (data) => {
-  const calculateDelta = (current, prev) => {
+const transformUmamiData = (data: any) => {
+  const calculateDelta = (current: number, prev: number) => {
     if (prev === 0) return null;
     const delta = ((current - prev) / prev * 100).toFixed(1);
-    return delta > 0 ? `+${delta}%` : `${delta}%`;
+    const deltaNum = parseFloat(delta);
+    return deltaNum > 0 ? `+${delta}%` : `${delta}%`;
   };
 
   return {
@@ -83,13 +84,13 @@ const transformUmamiData = (data) => {
       { id: 'bounces', title: 'Bounces', value: data.stats.bounces.value, subtitle: 'Single page visits', delta: calculateDelta(data.stats.bounces.value, data.stats.bounces.prev) },
       { id: 'totaltime', title: 'Total Time', value: `${Math.floor(data.stats.totaltime.value / 60)}m ${data.stats.totaltime.value % 60}s`, subtitle: 'Total session time', delta: calculateDelta(data.stats.totaltime.value, data.stats.totaltime.prev) }
     ],
-    pages: data.topMetrics.urls.map(url => ({ path: url.x || 'Direct', count: url.y })),
-    countries: data.topMetrics.countries.map(country => ({ name: country.x, count: country.y })),
-    referrers: data.topMetrics.referrers.map(ref => ({ name: ref.x || 'Direct', count: ref.y })),
-    worldMapData: data.topMetrics.countries.map(country => ({ country: country.x.toLowerCase(), value: country.y })),
-    hourlyData: data.timeseries.pageviews.map(item => ({ 
+    pages: data.topMetrics.urls.map((url: any) => ({ path: url.x || 'Direct', count: url.y })),
+    countries: data.topMetrics.countries.map((country: any) => ({ name: country.x, count: country.y })),
+    referrers: data.topMetrics.referrers.map((ref: any) => ({ name: ref.x || 'Direct', count: ref.y })),
+    worldMapData: data.topMetrics.countries.map((country: any) => ({ country: country.x.toLowerCase(), value: country.y })),
+    hourlyData: data.timeseries.pageviews.map((item: any) => ({ 
       hour: new Date(item.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), 
-      visitors: data.timeseries.sessions.find(s => s.x === item.x)?.y || 0, 
+      visitors: data.timeseries.sessions.find((s: any) => s.x === item.x)?.y || 0, 
       views: item.y 
     })),
     events: [
@@ -115,7 +116,7 @@ const mockInitialData = transformUmamiData(umamiSampleData);
  *   worldMapData: Array (see WorldMap props)
  * }
  */
-export default function DashboardContainer({ initialData = mockInitialData }) {
+export default function DashboardContainer({ initialData = mockInitialData }: { initialData?: any }) {
   const {
     metrics,
     hourlyData,

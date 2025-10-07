@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { WorldMap } from 'react-svg-worldmap';
 
 // Mock data for demo purposes - analytics data

@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 // Mock data for demo purposes
 const mockMetrics = [
@@ -26,7 +26,7 @@ const mockMetrics = [
  * ]
  */
 export default function MetricCards({ metrics = mockMetrics }) {
-  const getDeltaColor = (delta) => {
+  const getDeltaColor = (delta: string | null) => {
     if (!delta) return '';
     if (delta.startsWith('+')) return 'text-emerald-600 bg-emerald-50';
     if (delta.startsWith('-')) return 'text-red-600 bg-red-50';

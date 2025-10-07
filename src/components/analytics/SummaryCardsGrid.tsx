@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 // Mock data for demo purposes
 const mockPages = [
@@ -40,14 +40,14 @@ export default function SummaryCardsGrid({
   referrers = mockReferrers,
   maxItems = 5 
 }) {
-  const SummaryCard = ({ title, items, icon }) => (
+  const SummaryCard = ({ title, items, icon }: any) => (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         <div className="text-gray-400">{icon}</div>
       </div>
       <div className="space-y-3">
-        {items.slice(0, maxItems).map((item, index) => (
+        {items.slice(0, maxItems).map((item: any, index: number) => (
           <div key={index} className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
@@ -60,7 +60,7 @@ export default function SummaryCardsGrid({
                 <div 
                   className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
                   style={{ 
-                    width: `${Math.min((item.count / Math.max(...items.map(i => i.count))) * 100, 100)}%` 
+                    width: `${Math.min((item.count / Math.max(...items.map((i: any) => i.count))) * 100, 100)}%` 
                   }}
                 ></div>
               </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 // Mock events for demo purposes
 const mockEvents = [
@@ -35,7 +35,7 @@ export default function LiveEventsCard({ events = mockEvents }) {
     return () => clearInterval(interval);
   }, []);
 
-  const getEventIcon = (type) => {
+  const getEventIcon = (type: string) => {
     switch (type) {
       case 'pageview':
         return '👁️';
@@ -48,7 +48,7 @@ export default function LiveEventsCard({ events = mockEvents }) {
     }
   };
 
-  const getEventDescription = (event) => {
+  const getEventDescription = (event: any) => {
     switch (event.type) {
       case 'pageview':
         return `Viewed ${event.payload?.path || 'page'}`;

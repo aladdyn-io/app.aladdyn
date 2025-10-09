@@ -23,6 +23,13 @@ export function Preview() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
+  }, [])
+
+  useEffect(() => {
     if (!url) {
       navigate('/')
       return
@@ -117,10 +124,10 @@ export function Preview() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 relative">
+    <div className="fixed inset-0 bg-gray-100 overflow-hidden">
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-sm border-b">
-        <div className="flex items-center justify-between p-4">
+      <div className="absolute top-0 left-0 right-0 z-20 h-16 bg-white/95 backdrop-blur-sm border-b">
+        <div className="flex items-center justify-between p-4 h-full">
           <div className="flex items-center gap-3">
             <div className="px-3 py-1 bg-gray-100 rounded-full">
               <span className="text-sm font-medium text-gray-600">{cleanUrl}</span>
@@ -153,29 +160,29 @@ export function Preview() {
 
       {/* Chat Interface */}
       {isChatOpen ? (
-        <div className="fixed bottom-6 right-6 z-20 w-96 h-[600px] flex flex-col">
+        <div className="fixed bottom-4 right-4 z-20 w-72 h-80 flex flex-col">
           <Card className="h-full flex flex-col shadow-2xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
-              <CardTitle className="flex items-center gap-2">
-                <Bot className="w-5 h-5 text-emerald-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b shrink-0">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Bot className="w-4 h-4 text-emerald-600" />
                 AI Agent
               </CardTitle>
               <Button
                 variant="ghost"
                 onClick={() => setIsChatOpen(false)}
-                className="p-2 flex items-center justify-center"
+                className="p-1 h-6 w-6 flex items-center justify-center"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3 h-3" />
               </Button>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden min-h-0">
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+              <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
                 {messages.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">
-                    <Bot className="w-12 h-12 mx-auto mb-3 text-emerald-600/50" />
-                    <p className="text-sm">Hi! I'm your AI assistant.</p>
-                    <p className="text-sm">Ask me anything about this website!</p>
+                  <div className="text-center text-gray-500 py-4">
+                    <Bot className="w-8 h-8 mx-auto mb-2 text-emerald-600/50" />
+                    <p className="text-xs">Hi! I'm your AI assistant.</p>
+                    <p className="text-xs">Ask me anything about this website!</p>
                   </div>
                 ) : (
                   messages.map((message) => (
@@ -186,22 +193,22 @@ export function Preview() {
                       }`}
                     >
                       {message.role === 'assistant' && (
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                          <Bot className="w-4 h-4 text-emerald-600" />
+                        <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                          <Bot className="w-3 h-3 text-emerald-600" />
                         </div>
                       )}
                       <div
-                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                        className={`max-w-[75%] rounded-lg px-3 py-2 ${
                           message.role === 'user'
                             ? 'bg-gradient-to-r from-emerald-600 to-emerald-800 text-white'
                             : 'bg-gray-100 text-gray-900'
                         }`}
                       >
-                        <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                        <p className="text-xs whitespace-pre-wrap break-words">{message.content}</p>
                       </div>
                       {message.role === 'user' && (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-800 flex items-center justify-center shrink-0">
-                          <User className="w-4 h-4 text-white" />
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-800 flex items-center justify-center shrink-0">
+                          <User className="w-3 h-3 text-white" />
                         </div>
                       )}
                     </div>
@@ -211,7 +218,7 @@ export function Preview() {
               </div>
 
               {/* Input Area */}
-              <div className="border-t p-4">
+              <div className="border-t p-3 shrink-0">
                 <div className="flex gap-2">
                   <Input
                     value={inputValue}
@@ -224,17 +231,17 @@ export function Preview() {
                     }}
                     placeholder="Ask a question..."
                     disabled={isSending}
-                    className="flex-1"
+                    className="flex-1 text-sm h-8"
                   />
                   <Button
                     onClick={handleSendMessage}
                     disabled={isSending || !inputValue.trim()}
-                    className="bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 px-3 py-2 flex items-center justify-center"
+                    className="bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 px-2 py-1 h-8 w-8 flex items-center justify-center"
                   >
                     {isSending ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3 h-3 animate-spin" />
                     ) : (
-                      <Send className="w-4 h-4" />
+                      <Send className="w-3 h-3" />
                     )}
                   </Button>
                 </div>
@@ -243,18 +250,18 @@ export function Preview() {
           </Card>
         </div>
       ) : (
-        <div className="fixed bottom-6 right-6 z-20">
+        <div className="fixed bottom-4 right-4 z-20">
           <div
             onClick={() => setIsChatOpen(true)}
-            className="w-16 h-16 bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-full flex items-center justify-center shadow-2xl cursor-pointer hover:from-emerald-700 hover:to-emerald-900 transition-colors animate-pulse"
+            className="w-12 h-12 bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-full flex items-center justify-center shadow-2xl cursor-pointer hover:from-emerald-700 hover:to-emerald-900 transition-colors animate-pulse"
           >
-            <MessageSquare className="w-8 h-8 text-white" />
+            <MessageSquare className="w-6 h-6 text-white" />
           </div>
         </div>
       )}
 
       {/* Website Iframe */}
-      <div className="pt-16 h-screen">
+      <div className="absolute top-16 left-0 right-0 bottom-0">
         <iframe
           src={fullUrl}
           className="w-full h-full border-0"

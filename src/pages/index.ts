@@ -1,8 +1,10 @@
 // Main pages
 export { Home } from './Landing';
 export { Login } from './Login';
+export { Register } from './Register';
 export { Onboarding } from './Onboarding';
 export { Preview } from './Preview';
+export { Pricing } from './Pricing';
 
 // Home section pages
 export { 

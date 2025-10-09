@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { 
   About, 
   Dashboard, 
@@ -8,8 +8,10 @@ import {
   Profile, 
   Settings,
   Login,
+  Register,
   Onboarding,
   Preview,
+  Pricing,
   GenieDashboard,
   GenieAnalytics,
   GeniePlayground,
@@ -29,11 +31,17 @@ function App() {
         {/* Login page without layout */}
         <Route path="/login" element={<Login />} />
         
+        {/* Register page without layout */}
+        <Route path="/register" element={<Register />} />
+        
         {/* Onboarding page without layout */}
         <Route path="/onboarding" element={<Onboarding />} />
         
         {/* Preview page without layout */}
         <Route path="/preview/:url" element={<Preview />} />
+        
+        {/* Pricing page without layout */}
+        <Route path="/pricing" element={<Pricing />} />
         
         {/* Home section with HomeSidebarLayout */}
         <Route path="/home/*" element={
@@ -55,6 +63,7 @@ function App() {
           <GenieSidebarLayout>
             <Routes>
               <Route path="/" element={<GenieDashboard />} />
+              <Route path="/:genieId" element={<GenieDashboard />} />
               <Route path="/analytics" element={<GenieAnalytics />} />
               <Route path="/playground" element={<GeniePlayground />} />
               <Route path="/leads" element={<LeadTrack />} />

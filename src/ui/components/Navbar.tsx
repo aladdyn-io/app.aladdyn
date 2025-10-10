@@ -1,34 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { HomeIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/ui/utils/cn';
-import { useState, useRef, useEffect } from 'react';
+
 import { Breadcrumb } from './Breadcrumb';
 
 export function Navbar() {
   const location = useLocation();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(1); // Default to Vijay's project
-  const [hoveredProject, setHoveredProject] = useState<number | null>(null);
-  const [hideTimeout, setHideTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
   const isActive = (path: string) => {
     return location.pathname === path;
   };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   const projects = [
     { 
@@ -66,7 +46,7 @@ export function Navbar() {
     },
   ];
 
-  const currentGenies = projects.find(p => p.id === selectedProject)?.genies || [];
+
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200 lg:ml-64">

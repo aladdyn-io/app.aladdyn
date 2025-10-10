@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/ui/utils/cn';
 import { useState, useRef, useEffect } from 'react';
 
@@ -12,7 +12,7 @@ export function Breadcrumb() {
   const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
-  const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [hideTimeout, setHideTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [selectedProject, setSelectedProject] = useState(1);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -55,11 +55,9 @@ export function Breadcrumb() {
     };
   }, [hideTimeout]);
   
-  // Get current genie info
-  const pathSegments = location.pathname.split('/').filter(Boolean);
+  // Get current project info
   const currentProject = projects.find(p => p.id === selectedProject);
   const currentProjectName = currentProject?.name || "Vijay's project";
-  const currentGenies = currentProject?.genies || [];
   
 
   

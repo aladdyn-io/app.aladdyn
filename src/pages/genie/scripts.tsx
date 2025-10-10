@@ -1,7 +1,7 @@
 import { RotateCcw, MessageSquare, X, Send, Bot, User } from 'lucide-react';
 import { Button } from '@/ui/components/Button';
 import { Label } from '@/ui/components/Label';
-import { Separator } from '@/ui/components/Separator';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/components/Tabs';
 import { Input } from '@/ui/components/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/components/Card';

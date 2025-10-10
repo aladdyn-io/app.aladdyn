@@ -20,14 +20,21 @@ interface SidebarItem {
   current?: boolean;
 }
 
+const quickActions: SidebarItem[] = [
+  { name: 'Quick Create', href: '/home/quick-create', icon: HomeIcon },
+  { name: 'Inbox', href: '/home/inbox', icon: InformationCircleIcon },
+];
+
 const navigation: SidebarItem[] = [
   { name: 'Dashboard', href: '/home', icon: HomeIcon },
+  { name: 'Lifecycle', href: '/home/lifecycle', icon: Cog6ToothIcon },
   { name: 'Analytics', href: '/home/analytics', icon: ChartBarIcon },
+  { name: 'Projects', href: '/home/projects', icon: DocumentTextIcon },
+  { name: 'Team', href: '/home/team', icon: UserIcon },
   { name: 'Documents', href: '/home/documents', icon: DocumentTextIcon },
-  { name: 'Notifications', href: '/home/notifications', icon: BellIcon },
-  { name: 'Profile', href: '/home/profile', icon: UserIcon },
-  { name: 'Settings', href: '/home/settings', icon: Cog6ToothIcon },
-  { name: 'About', href: '/home/about', icon: InformationCircleIcon },
+  { name: 'Data Library', href: '/home/data-library', icon: BellIcon },
+  { name: 'Reports', href: '/home/reports', icon: ChartBarIcon },
+  { name: 'Word Assistant', href: '/home/word-assistant', icon: DocumentTextIcon },
 ];
 
 interface SidebarProps {
@@ -87,6 +94,37 @@ export function Sidebar({ className }: SidebarProps) {
         </div>
         <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
+            {/* Quick Actions */}
+            <li>
+              <ul role="list" className="-mx-2 space-y-1">
+                {quickActions.map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      to={item.href}
+                      className={cn(
+                        isCurrentPath(item.href)
+                          ? 'bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-800 shadow-sm'
+                          : 'text-gray-700 hover:text-emerald-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100',
+                        'group flex gap-x-3 rounded-lg p-2 text-sm leading-6 font-medium transition-all duration-200 hover:shadow-sm'
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          isCurrentPath(item.href)
+                            ? 'text-emerald-700 drop-shadow-sm'
+                            : 'text-gray-400 group-hover:text-emerald-600',
+                          'h-5 w-5 shrink-0 transition-colors duration-200'
+                        )}
+                        aria-hidden="true"
+                      />
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </li>
+            
+            {/* Main Navigation */}
             <li>
               <ul role="list" className="-mx-2 space-y-1">
                 {navigation.map((item) => (
@@ -110,9 +148,24 @@ export function Sidebar({ className }: SidebarProps) {
                         aria-hidden="true"
                       />
                       {item.name}
+                      {(item.name === 'Data Library' || item.name === 'Reports' || item.name === 'Word Assistant') && (
+                        <span className="ml-auto text-xs text-gray-400">More</span>
+                      )}
                     </Link>
                   </li>
                 ))}
+                <li>
+                  <Link
+                    to="/home/more"
+                    className="group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium transition-all duration-200 hover:shadow-sm text-gray-700 hover:text-emerald-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100"
+                  >
+                    <BellIcon
+                      className="h-6 w-6 shrink-0 transition-colors duration-200 text-gray-400 group-hover:text-emerald-600"
+                      aria-hidden="true"
+                    />
+                    More
+                  </Link>
+                </li>
               </ul>
             </li>
           </ul>

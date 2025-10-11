@@ -2,22 +2,21 @@
 
 import * as React from "react"
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react"
+  Camera,
+  BarChart,
+  LayoutDashboard,
+  Database,
+  FileCode,
+  FileText,
+  FileType,
+  Folder,
+  HelpCircle,
+  List,
+  FileBarChart,
+  Search,
+  Settings,
+  Users,
+} from "lucide-react"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
@@ -47,33 +46,33 @@ const data = {
     {
       title: "Dashboard",
       url: "#",
-      icon: IconDashboard,
+      icon: LayoutDashboard,
     },
     {
       title: "Lifecycle",
       url: "#",
-      icon: IconListDetails,
+      icon: List,
     },
     {
       title: "Analytics",
       url: "#",
-      icon: IconChartBar,
+      icon: BarChart,
     },
     {
       title: "Projects",
       url: "#",
-      icon: IconFolder,
+      icon: Folder,
     },
     {
       title: "Team",
       url: "#",
-      icon: IconUsers,
+      icon: Users,
     },
   ],
   navClouds: [
     {
       title: "Capture",
-      icon: IconCamera,
+      icon: Camera,
       isActive: true,
       url: "#",
       items: [
@@ -89,7 +88,7 @@ const data = {
     },
     {
       title: "Proposal",
-      icon: IconFileDescription,
+      icon: FileText,
       url: "#",
       items: [
         {
@@ -104,7 +103,7 @@ const data = {
     },
     {
       title: "Prompts",
-      icon: IconFileAi,
+      icon: FileCode,
       url: "#",
       items: [
         {
@@ -122,34 +121,34 @@ const data = {
     {
       title: "Settings",
       url: "#",
-      icon: IconSettings,
+      icon: Settings,
     },
     {
       title: "Get Help",
       url: "#",
-      icon: IconHelp,
+      icon: HelpCircle,
     },
     {
       title: "Search",
       url: "#",
-      icon: IconSearch,
+      icon: Search,
     },
   ],
   documents: [
     {
       name: "Data Library",
       url: "#",
-      icon: IconDatabase,
+      icon: Database,
     },
     {
       name: "Reports",
       url: "#",
-      icon: IconReport,
+      icon: FileBarChart,
     },
     {
       name: "Word Assistant",
       url: "#",
-      icon: IconFileWord,
+      icon: FileType,
     },
   ],
 }

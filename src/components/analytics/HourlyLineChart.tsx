@@ -56,22 +56,12 @@ interface HourlyLineChartProps {
 }
 
 export default function HourlyLineChart({ data = mockData }: HourlyLineChartProps) {
-interface TooltipProps {
-  active?: boolean;
-  payload?: Array<{
-    name: string;
-    value: number;
-    color: string;
-  }>;
-  label?: string | number;
-}
-
-  const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
+  const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
           <p className="text-sm font-medium text-gray-900">{`Time: ${label}`}</p>
-          {payload.map((entry, index: number) => (
+          {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {`${entry.name}: ${entry.value}`}
             </p>

@@ -1,10 +1,6 @@
-import { RotateCcw, MessageSquare, X, Send, Bot, User } from 'lucide-react';
+import { RotateCcw, MessageSquare, X, Send, Bot, User, Settings, Eye } from 'lucide-react';
 import { Button } from '@/ui/components/Button';
-import { Label } from '@/ui/components/Label';
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/components/Tabs';
 import { Input } from '@/ui/components/Input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/components/Card';
 import { useState, useEffect } from 'react';
 
 export function GenieScripts() {
@@ -14,6 +10,36 @@ export function GenieScripts() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState<Array<{id: string, role: 'user' | 'assistant', content: string}>>([]);
   const [inputValue, setInputValue] = useState('');
+  const [activeView, setActiveView] = useState<'chat' | 'website' | 'preview'>('preview');
+  const [config, setConfig] = useState({
+    botName: 'Support Bot',
+    botStatus: 'Always online',
+    headerBg: '#0d47a1',
+    headerText: '#ffffff',
+    botBubbleBg: '#e3f2fd',
+    botBubbleText: '#0d47a1',
+    userBubbleBg: 'linear-gradient(135deg, #43a047, #1b5e20)',
+    userBubbleText: '#ffffff',
+    bgFrom: '#e3f2fd',
+    bgTo: '#ede7f6',
+    chatBg: 'linear-gradient(135deg, #e3f2fd, #ede7f6)',
+    fontSize: '16px',
+    fontFamily: "'Segoe UI', Roboto, sans-serif",
+    botAvatar: 'https://i.pravatar.cc/150?img=1',
+    userAvatar: 'https://i.pravatar.cc/150?img=2',
+    inputBg: '#ffffff',
+    inputBorder: '1px solid #64b5f6',
+    inputText: '#212121',
+    inputPlaceholder: '#9e9e9e',
+    buttonBg: 'linear-gradient(135deg, #43a047, #1b5e20)',
+    buttonText: '#ffffff',
+    buttonShadow: '0px 2px 6px rgba(76, 175, 80, 0.3)',
+    buttonHover: 'linear-gradient(135deg, #388e3c, #2e7d32)',
+    borderRadius: '12px',
+    shadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    welcomeMessage: 'Hi! How can I help you today?',
+    placeholder: 'Type your message...'
+  });
 
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 
@@ -53,308 +79,119 @@ export function GenieScripts() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className='flex items-center justify-between'>
         <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">Scripts</h1>
+         {/* Chat/Website/Preview Toggle */}
+        <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 w-fit">
+          <button
+            onClick={() => setActiveView('chat')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+              activeView === 'chat'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+            }`}
+          >
+            Chat
+          </button>
+          <button
+            onClick={() => setActiveView('website')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+              activeView === 'website'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+            }`}
+          >
+            Website
+          </button>
+          <button
+            onClick={() => setActiveView('preview')}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-2 ${
+              activeView === 'preview'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+            }`}
+          >
+            <Eye className="h-4 w-4" />
+            Preview
+          </button>
+        </div>
       </div>
+      
+      <div className='bg-black h-[calc(100vh-11rem)] w-full '>
+      
 
-      <div className="hidden flex-1 flex-col md:flex">
-        <Tabs defaultValue="complete" className="flex flex-1 flex-col ">
-          <div className="flex flex-1 flex-col py-6">
-            <div className="grid flex-1 items-stretch gap-6 md:grid-cols-[1fr_200px]">
-              <div className="hidden flex-col gap-6 sm:flex md:order-2">
-                <div className="grid gap-3">
-                  <span className="text-sm leading-none font-medium">Mode</span>
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="complete">
-                      <span className="sr-only">Complete</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" className="h-5 w-5">
-                        <rect x="4" y="3" width="12" height="2" rx="1" fill="currentColor" />
-                        <rect x="4" y="7" width="12" height="2" rx="1" fill="currentColor" />
-                        <rect x="4" y="11" width="3" height="2" rx="1" fill="currentColor" />
-                        <rect x="4" y="15" width="3" height="2" rx="1" fill="currentColor" />
-                        <rect x="8.5" y="11" width="3" height="2" rx="1" fill="currentColor" />
-                        <rect x="8.5" y="15" width="3" height="2" rx="1" fill="currentColor" />
-                        <rect x="13" y="11" width="3" height="2" rx="1" fill="currentColor" />
-                      </svg>
-                    </TabsTrigger>
-                    <TabsTrigger value="insert">
-                      <span className="sr-only">Insert</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" className="h-5 w-5">
-                        <path fillRule="evenodd" clipRule="evenodd" d="M14.491 7.769a.888.888 0 0 1 .287.648.888.888 0 0 1-.287.648l-3.916 3.667a1.013 1.013 0 0 1-.692.268c-.26 0-.509-.097-.692-.268L5.275 9.065A.886.886 0 0 1 5 8.42a.889.889 0 0 1 .287-.64c.181-.17.427-.267.683-.269.257-.002.504.09.69.258L8.903 9.87V3.917c0-.243.103-.477.287-.649.183-.171.432-.268.692-.268.26 0 .509.097.692.268a.888.888 0 0 1 .287.649V9.87l2.245-2.102c.183-.172.432-.269.692-.269.26 0 .508.097.692.269Z" fill="currentColor" />
-                        <rect x="4" y="15" width="3" height="2" rx="1" fill="currentColor" />
-                        <rect x="8.5" y="15" width="3" height="2" rx="1" fill="currentColor" />
-                        <rect x="13" y="15" width="3" height="2" rx="1" fill="currentColor" />
-                      </svg>
-                    </TabsTrigger>
-                    <TabsTrigger value="edit">
-                      <span className="sr-only">Edit</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" className="h-5 w-5">
-                        <rect x="4" y="3" width="12" height="2" rx="1" fill="currentColor" />
-                        <rect x="4" y="7" width="12" height="2" rx="1" fill="currentColor" />
-                        <rect x="4" y="11" width="3" height="2" rx="1" fill="currentColor" />
-                        <rect x="4" y="15" width="4" height="2" rx="1" fill="currentColor" />
-                        <rect x="8.5" y="11" width="3" height="2" rx="1" fill="currentColor" />
-                        <path d="M17.154 11.346a1.182 1.182 0 0 0-1.671 0L11 15.829V17.5h1.671l4.483-4.483a1.182 1.182 0 0 0 0-1.671Z" fill="currentColor" />
-                      </svg>
-                    </TabsTrigger>
-                  </TabsList>
+        {/* Content based on active view */}
+        {activeView === 'preview' ? (
+          <div className="h-full w-full ">
+            <iframe 
+              src="/chatbot-preview.html" 
+              className="w-full h-full border-0 rounded-lg"
+              title="Chatbot Widget Preview"
+            />
+          </div>
+        ) : activeView === 'chat' ? (
+          <div className="bg-white rounded-lg border border-gray-200 h-full w-full flex flex-col">
+            {/* Chat Header */}
+            <div className="bg-emerald-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Bot className="h-6 w-6" />
+                <div>
+                  <h3 className="font-semibold">Support Bot</h3>
+                  <p className="text-xs opacity-80">Always online</p>
                 </div>
               </div>
-              <div className="flex flex-1 flex-col md:order-1">
-                <TabsContent value="complete" className="mt-0 border-0 p-0">
-                  <div className="flex flex-col gap-4">
-                    <div className="relative">
-                      {showChatbot ? (
-                        <iframe
-                          src={previewUrl}
-                          className="w-full h-[60vh] border border-gray-300 rounded-lg"
-                          title="Website Preview"
-                          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                        />
-                      ) : (
-                        <textarea
-                          value={textareaValue}
-                          onChange={(e) => setTextareaValue(e.target.value)}
-                          placeholder="Write a tagline for an ice cream shop. Try pasting: https://elanenterprises.in/"
-                          className="h-[60vh] w-full p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        />
-                      )}
-                      
-                      {/* Mini Chatbot */}
-                      {showChatbot && (
-                        <>
-                          {isChatOpen ? (
-                            <div className="absolute bottom-4 right-4 w-72 h-80 z-10">
-                              <Card className="h-full flex flex-col shadow-lg bg-white">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b shrink-0">
-                                  <CardTitle className="flex items-center gap-2 text-sm">
-                                    <Bot className="w-4 h-4 text-emerald-600" />
-                                    Website Assistant
-                                  </CardTitle>
-                                  <Button
-                                    variant="ghost"
-                                    onClick={() => setIsChatOpen(false)}
-                                    className="p-1 h-6 w-6"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </Button>
-                                </CardHeader>
-                                <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-                                  <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                                    {messages.length === 0 ? (
-                                      <div className="text-center text-gray-500 py-4">
-                                        <Bot className="w-8 h-8 mx-auto mb-2 text-emerald-600/50" />
-                                        <p className="text-xs">Ask me about this website!</p>
-                                      </div>
-                                    ) : (
-                                      messages.map((message) => (
-                                        <div key={message.id} className={`flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                          {message.role === 'assistant' && (
-                                            <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                                              <Bot className="w-3 h-3 text-emerald-600" />
-                                            </div>
-                                          )}
-                                          <div className={`max-w-[75%] rounded-lg px-3 py-2 ${message.role === 'user' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
-                                            <p className="text-xs">{message.content}</p>
-                                          </div>
-                                          {message.role === 'user' && (
-                                            <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
-                                              <User className="w-3 h-3 text-white" />
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))
-                                    )}
-                                  </div>
-                                  <div className="border-t p-3">
-                                    <div className="flex gap-2">
-                                      <Input
-                                        value={inputValue}
-                                        onChange={(e) => setInputValue(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                        placeholder="Ask about the website..."
-                                        className="flex-1 text-sm h-8"
-                                      />
-                                      <Button
-                                        onClick={handleSendMessage}
-                                        className="bg-emerald-600 hover:bg-emerald-700 px-2 py-1 h-8 w-8"
-                                      >
-                                        <Send className="w-3 h-3" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </div>
-                          ) : (
-                            <div className="absolute bottom-4 right-4">
-                              <div
-                                onClick={() => setIsChatOpen(true)}
-                                className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-emerald-700 transition-colors animate-pulse"
-                              >
-                                <MessageSquare className="w-6 h-6 text-white" />
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    
+            </div>
 
-                    
-                    <div className="flex items-center gap-2">
-                      <Button variant="primary" className="bg-emerald-600 hover:bg-emerald-700">Submit</Button>
-                      <Button variant="secondary">
-                        <span className="sr-only">Show history</span>
-                        <RotateCcw className="h-4 w-4" />
-                      </Button>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+              {messages.length === 0 ? (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 rounded-lg p-3 max-w-xs">
+                    <p className="text-sm text-gray-700">Hi! How can I help you today?</p>
+                  </div>
+                </div>
+              ) : (
+                messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`rounded-lg p-3 max-w-xs ${
+                      message.role === 'user'
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-white border border-gray-200 text-gray-700'
+                    }`}>
+                      <p className="text-sm">{message.content}</p>
                     </div>
                   </div>
-                </TabsContent>
-                <TabsContent value="insert" className="mt-0 flex flex-col gap-4 border-0 p-0">
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <div className="relative">
-                      <textarea
-                        value={textareaValue}
-                        onChange={(e) => setTextareaValue(e.target.value)}
-                        placeholder="We're writing to [insert]. Congrats from Aladdyn! Try pasting: https://elanenterprises.in/"
-                        className="h-[60vh] w-full p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                      />
-                      
-                      {/* Mini Chatbot */}
-                      {showChatbot && (
-                        <>
-                          {isChatOpen ? (
-                            <div className="absolute bottom-4 right-4 w-72 h-80 z-10">
-                              <Card className="h-full flex flex-col shadow-lg">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b shrink-0">
-                                  <CardTitle className="flex items-center gap-2 text-sm">
-                                    <Bot className="w-4 h-4 text-emerald-600" />
-                                    Website Assistant
-                                  </CardTitle>
-                                  <Button
-                                    variant="ghost"
-                                    onClick={() => setIsChatOpen(false)}
-                                    className="p-1 h-6 w-6"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </Button>
-                                </CardHeader>
-                                <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-                                  <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                                    {messages.length === 0 ? (
-                                      <div className="text-center text-gray-500 py-4">
-                                        <Bot className="w-8 h-8 mx-auto mb-2 text-emerald-600/50" />
-                                        <p className="text-xs">Ask me about this website!</p>
-                                      </div>
-                                    ) : (
-                                      messages.map((message) => (
-                                        <div key={message.id} className={`flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                          {message.role === 'assistant' && (
-                                            <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                                              <Bot className="w-3 h-3 text-emerald-600" />
-                                            </div>
-                                          )}
-                                          <div className={`max-w-[75%] rounded-lg px-3 py-2 ${message.role === 'user' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
-                                            <p className="text-xs">{message.content}</p>
-                                          </div>
-                                          {message.role === 'user' && (
-                                            <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
-                                              <User className="w-3 h-3 text-white" />
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))
-                                    )}
-                                  </div>
-                                  <div className="border-t p-3">
-                                    <div className="flex gap-2">
-                                      <Input
-                                        value={inputValue}
-                                        onChange={(e) => setInputValue(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                        placeholder="Ask about the website..."
-                                        className="flex-1 text-sm h-8"
-                                      />
-                                      <Button
-                                        onClick={handleSendMessage}
-                                        className="bg-emerald-600 hover:bg-emerald-700 px-2 py-1 h-8 w-8"
-                                      >
-                                        <Send className="w-3 h-3" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </div>
-                          ) : (
-                            <div className="absolute bottom-4 right-4">
-                              <div
-                                onClick={() => setIsChatOpen(true)}
-                                className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-emerald-700 transition-colors"
-                              >
-                                <MessageSquare className="w-6 h-6 text-white" />
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    <iframe
-                      src={previewUrl}
-                      className="w-full h-[60vh] border border-gray-300 rounded-lg"
-                      title="Website Preview"
-                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="primary" className="bg-emerald-600 hover:bg-emerald-700">Submit</Button>
-                    <Button variant="secondary">
-                      <span className="sr-only">Show history</span>
-                      <RotateCcw className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TabsContent>
-                <TabsContent value="edit" className="mt-0 flex flex-col gap-4 border-0 p-0">
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <div className="flex flex-col gap-4">
-                      <div className="flex flex-col gap-2">
-                        <Label htmlFor="input" className="sr-only">Input</Label>
-                        <textarea
-                          id="input"
-                          placeholder="We is going to the market."
-                          className="h-[50vh] p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label htmlFor="instructions">Instructions</Label>
-                        <textarea
-                          id="instructions"
-                          placeholder="Fix the grammar."
-                          className="p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                          rows={3}
-                        />
-                      </div>
-                    </div>
-                    <iframe
-                      src={previewUrl}
-                      className="w-full h-[60vh] border border-gray-300 rounded-lg"
-                      title="Website Preview"
-                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="primary" className="bg-emerald-600 hover:bg-emerald-700">Submit</Button>
-                    <Button variant="secondary">
-                      <span className="sr-only">Show history</span>
-                      <RotateCcw className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TabsContent>
+                ))
+              )}
+            </div>
+
+            {/* Input */}
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex space-x-2">
+                <Input
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="Type your message..."
+                  className="flex-1"
+                />
+                <Button onClick={handleSendMessage} className="bg-emerald-600 hover:bg-emerald-700">
+                  <Send className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
-        </Tabs>
+        ) : (
+          <div className="bg-white w-full h-full rounded-lg border border-gray-200 p-4">
+            <iframe
+              src={previewUrl}
+              className=" border h-full w-full border-gray-300 rounded-lg"
+              title="Website Preview"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            />
+          </div>
+        )}
+
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import { OnboardingNavbar } from '@/components/OnboardingNavbar'
 import { Button, Card, CardTitle, CardDescription, CardContent, Input, Label } from '@/ui/components'
 import { 
@@ -21,16 +22,48 @@ type OnboardingStep = 'intro' | 'website' | 'scrape' | 'prompt' | 'deploy'
 interface ScrapedLink {
   id: string
   url: string
-  type: 'internal' | 'external'
-  status: 'pending' | 'scraping' | 'completed' | 'error'
+  selected?: boolean
 }
 
 interface WebsiteData {
   website_id: string
   website_url: string
   scraped_doc: string
-  internal_links: string[]
-  external_links: string[]
+  genieId?: string
+}
+
+interface StreamEvent {
+  type: 'start' | 'info' | 'url' | 'complete' | 'result' | 'error'
+  message?: string
+  url?: string
+  count?: number
+  elapsed?: string
+  genieId?: string
+  websiteId?: string
+  timestamp?: string
+  stats?: {
+    totalUrls: number
+    pagesCrawled: number
+    duration: number
+    speed: number
+    errors: number
+    method: string
+  }
+  data?: {
+    genieId: string
+    websiteId: string
+    url: string
+    urls: string[]
+    stats: {
+      totalUrls: number
+      pagesCrawled: number
+      duration: number
+      speed: number
+      errors: number
+      method: string
+    }
+  }
+  error?: string
 }
 
 const SAMPLE_WEBSITES = [
@@ -39,28 +72,19 @@ const SAMPLE_WEBSITES = [
   { id: 'site3', name: 'Meeting Assistant', url: 'https://elanenterprises.in', type: 'enterprise', image: '/assets/enterprises.png' },
 ]
 
-const SAMPLE_PROMPTS = [
-  {
-    id: 'customer-support',
-    title: 'Customer Support Agent',
-    description: 'Help customers with product inquiries, order status, and general support questions.',
-    capabilities: ['Order tracking', 'Product recommendations', 'Return/refund assistance', 'Live chat support']
-  },
-  {
-    id: 'sales-assistant',
-    title: 'Sales Assistant',
-    description: 'Guide customers through the purchase process and answer product questions.',
-    capabilities: ['Product comparisons', 'Pricing information', 'Checkout assistance', 'Upselling recommendations']
-  },
-  {
-    id: 'content-helper',
-    title: 'Content Helper',
-    description: 'Assist with content creation, editing, and management tasks.',
-    capabilities: ['Content suggestions', 'SEO optimization', 'Writing assistance', 'Content organization']
-  }
-]
+interface AdminPrompt {
+  id: string
+  value: string
+  tag: string
+  qualities: {
+    id: string
+    value: string
+  }[]
+}
 
 export function Onboarding() {
+  const { genieId } = useParams<{ genieId?: string }>()
+  
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('intro')
   const [selectedWebsite, setSelectedWebsite] = useState<string>('')
   const [customWebsite, setCustomWebsite] = useState<string>('')
@@ -72,7 +96,89 @@ export function Onboarding() {
   const [scrapedLinks, setScrapedLinks] = useState<ScrapedLink[]>([])
   const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null)
   const [availableLinks, setAvailableLinks] = useState<string[]>([])
+  const [streamMessages, setStreamMessages] = useState<string[]>([])
+  const [crawlStats, setCrawlStats] = useState<{ totalUrls: number; pagesCrawled: number; duration: number } | null>(null)
+  const [adminPrompts, setAdminPrompts] = useState<AdminPrompt[]>([])
+  const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
   const SCRAPE_LIMIT = 2
+
+  // Load existing genie data if genieId is provided in URL
+  useEffect(() => {
+    if (genieId) {
+      console.log('📋 Loading existing genie:', genieId)
+      
+      // Store genieId in localStorage
+      localStorage.setItem('currentGenieId', genieId)
+      
+      // If coming from a URL with genieId, assume we're continuing from a previous session
+      // Skip intro and go to prompt configuration or scrape review
+      const storedWebsiteData = localStorage.getItem(`websiteData_${genieId}`)
+      if (storedWebsiteData) {
+        try {
+          const data = JSON.parse(storedWebsiteData)
+          setWebsiteData(data)
+          setCustomWebsite(data.website_url)
+          
+          // Restore links with selection state if available
+          const links = data.scrapedLinks || (data.internal_links || []).map((url: string, index: number) => ({
+            id: `link_${index}`,
+            url,
+            selected: true
+          }))
+          setScrapedLinks(links)
+          setCurrentStep('prompt') // Skip to prompt step
+        } catch (error) {
+          console.error('Failed to load website data:', error)
+        }
+      } else {
+        // If no stored data, start from website selection
+        setCurrentStep('website')
+      }
+    }
+  }, [genieId])
+
+  // Update localStorage when scraped links selection changes
+  useEffect(() => {
+    if (websiteData?.genieId && scrapedLinks.length > 0) {
+      const updatedData = {
+        ...websiteData,
+        scrapedLinks: scrapedLinks
+      }
+      localStorage.setItem(`websiteData_${websiteData.genieId}`, JSON.stringify(updatedData))
+    }
+  }, [scrapedLinks, websiteData])
+
+  // Fetch admin prompts when reaching prompt step
+  useEffect(() => {
+    if (currentStep === 'prompt' && adminPrompts.length === 0) {
+      fetchAdminPrompts()
+    }
+  }, [currentStep])
+
+  // Fetch admin prompts from API
+  const fetchAdminPrompts = async () => {
+    setIsLoadingPrompts(true)
+    const backendUrl = getBackendUrl()
+    
+    try {
+      const response = await fetch(`${backendUrl}/api/prompts/admin?websiteType=enterprise`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch prompts')
+      }
+      
+      const data = await response.json()
+      
+      if (data.success && data.prompts) {
+        setAdminPrompts(data.prompts)
+        console.log('✅ Loaded admin prompts:', data.prompts.length)
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch admin prompts:', error)
+    } finally {
+      setIsLoadingPrompts(false)
+    }
+  }
 
   const handleWebsiteSelect = (websiteId: string) => {
     setSelectedWebsite(websiteId)
@@ -97,41 +203,152 @@ export function Onboarding() {
     setSelectedPrompt('')
   }
 
-  // Scrape a single page using Puppeteer via backend API
-  const scrapePage = async (url: string): Promise<{ content: string; internalLinks: string[]; externalLinks: string[] }> => {
-    try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-      const response = await fetch(`${backendUrl}/api/scrape`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
-      }
-      
-      const data = await response.json()
-      return {
-        content: data.content || '',
-        internalLinks: data.internalLinks || [],
-        externalLinks: data.externalLinks || [],
-      }
-      
-    } catch (error) {
-      console.error(`Error scraping ${url}:`, error)
-      return {
-        content: `Failed to scrape ${url}`,
-        internalLinks: [],
-        externalLinks: [],
-      }
-    }
+  // Get backend URL from environment variable
+  const getBackendUrl = () => {
+    return import.meta.env.VITE_GENIE_BACKEND_URL;
   }
 
-  // Handle link deletion
+  // Stream-based website scraping using SSE
+  const scrapeWebsiteStream = async (mainUrl: string): Promise<void> => {
+    const cleanUrl = mainUrl.startsWith('http') ? mainUrl : `https://${mainUrl}`
+    const userId = 'a073171e-e270-4fdb-a574-e40383b97173'
+    const backendUrl = getBackendUrl()
+    
+    // Reset state
+    setScrapedLinks([])
+    setStreamMessages([])
+    setCrawlStats(null)
+    setCurrentlyScraping(cleanUrl)
+    
+    const params = new URLSearchParams({
+      userId,
+      url: cleanUrl,
+      type: 'onboarding',
+      maxPages: '100'
+    })
+    
+    const eventSource = new EventSource(`${backendUrl}/api/onboarding/stream?${params}`)
+    
+    return new Promise((resolve, reject) => {
+      eventSource.onmessage = (event) => {
+        try {
+          const data: StreamEvent = JSON.parse(event.data)
+          
+          switch (data.type) {
+            case 'start':
+              console.log('🚀 Stream started:', data)
+              setStreamMessages(prev => [...prev, `Started crawling ${data.url}`])
+              if (data.genieId) {
+                setWebsiteData(prev => ({
+                  ...prev!,
+                  website_id: userId,
+                  website_url: cleanUrl,
+                  scraped_doc: '',
+                  genieId: data.genieId
+                }))
+              }
+              break
+              
+            case 'info':
+              console.log('ℹ️ Info:', data.message)
+              setStreamMessages(prev => [...prev, data.message || ''])
+              break
+              
+            case 'url':
+              console.log('📄 URL crawled:', data.url)
+              if (data.url) {
+                const newLink: ScrapedLink = {
+                  id: `link_${Date.now()}_${Math.random()}`,
+                  url: data.url
+                }
+                setScrapedLinks(prev => [...prev, newLink])
+                setCurrentlyScraping(data.url)
+              }
+              break
+              
+            case 'complete':
+              console.log('✅ Crawl complete:', data.stats)
+              setStreamMessages(prev => [...prev, `Completed: ${data.stats?.pagesCrawled} pages crawled`])
+              if (data.stats) {
+                setCrawlStats({
+                  totalUrls: data.stats.totalUrls,
+                  pagesCrawled: data.stats.pagesCrawled,
+                  duration: data.stats.duration
+                })
+              }
+              break
+              
+            case 'result':
+              console.log('📊 Final result:', data.data)
+              if (data.data) {
+                const allLinks: ScrapedLink[] = data.data.urls.map((url, index) => ({
+                  id: `link_${index}`,
+                  url,
+                  selected: true // Default to selected
+                }))
+                
+                const newWebsiteData = {
+                  website_id: userId,
+                  website_url: cleanUrl,
+                  scraped_doc: '',
+                  genieId: data.data.genieId,
+                  scrapedLinks: allLinks // Store links with selection state
+                }
+                
+                setScrapedLinks(allLinks)
+                setWebsiteData(newWebsiteData)
+                
+                // Store genieId and website data in localStorage for continuation
+                if (data.data.genieId) {
+                  localStorage.setItem('currentGenieId', data.data.genieId)
+                  localStorage.setItem(`websiteData_${data.data.genieId}`, JSON.stringify(newWebsiteData))
+                  console.log('💾 Stored genieId:', data.data.genieId)
+                  
+                  // Update URL to include genieId without reloading
+                  window.history.replaceState(null, '', `/onboarding/${data.data.genieId}`)
+                }
+              }
+              
+              setCurrentlyScraping('')
+              eventSource.close()
+              resolve()
+              break
+              
+            case 'error':
+              console.error('❌ Error:', data.error)
+              setStreamMessages(prev => [...prev, `Error: ${data.error}`])
+              setCurrentlyScraping('')
+              eventSource.close()
+              reject(new Error(data.error || 'Stream error'))
+              break
+          }
+        } catch (error) {
+          console.error('Failed to parse SSE data:', error)
+        }
+      }
+      
+      eventSource.onerror = (error) => {
+        console.error('EventSource error:', error)
+        setStreamMessages(prev => [...prev, 'Connection error occurred'])
+        setCurrentlyScraping('')
+        eventSource.close()
+        reject(error)
+      }
+    })
+  }
+
+  // Handle link selection toggle
+  const handleToggleLink = (linkId: string) => {
+    setScrapedLinks(prev => prev.map(link => 
+      link.id === linkId ? { ...link, selected: !link.selected } : link
+    ))
+  }
+
+  // Handle select/deselect all
+  const handleSelectAll = (checked: boolean) => {
+    setScrapedLinks(prev => prev.map(link => ({ ...link, selected: checked })))
+  }
+
   const handleDeleteLink = (linkId: string) => {
     const deletedLink = scrapedLinks.find(link => link.id === linkId)
     if (deletedLink) {
@@ -140,155 +357,140 @@ export function Onboarding() {
     }
   }
 
-  // Handle adding link from available links
   const handleAddLink = (url: string) => {
     if (scrapedLinks.length < SCRAPE_LIMIT) {
       const newLink: ScrapedLink = {
         id: Date.now().toString(),
         url,
-        type: websiteData?.website_url && url.includes(new URL(websiteData.website_url).hostname) ? 'internal' : 'external',
-        status: 'pending'
+        selected: true
       }
       setScrapedLinks(prev => [...prev, newLink])
       setAvailableLinks(prev => prev.filter(link => link !== url))
     }
   }
 
-  // Main scraping function - sequential with link discovery
-  const scrapeWebsite = async (mainUrl: string) => {
-    const cleanUrl = mainUrl.startsWith('http') ? mainUrl : `https://${mainUrl}`
-    const websiteId = Date.now().toString()
-    const hostname = new URL(cleanUrl).hostname
-    
-    // Track all discovered links and already scraped URLs
-    const discoveredLinks = new Set<string>()
-    const scrapedUrls = new Set<string>()
-    const allScrapedLinks: ScrapedLink[] = []
-    
-    // Initialize website data
-    let currentWebsiteData: WebsiteData = {
-      website_id: websiteId,
-      website_url: cleanUrl,
-      scraped_doc: '',
-      internal_links: [],
-      external_links: [],
+  // Send URL selection to backend (Stage 2)
+  const sendUrlSelection = async () => {
+    if (!websiteData?.genieId) {
+      console.error('No genieId available for URL selection')
+      return
     }
+
+    const backendUrl = getBackendUrl()
     
-    // Queue starts with main URL
-    const toScrapeQueue = [cleanUrl]
-    
-    // Scrape up to SCRAPE_LIMIT pages
-    while (toScrapeQueue.length > 0 && allScrapedLinks.filter(l => l.type === 'internal').length < SCRAPE_LIMIT) {
-      const currentUrl = toScrapeQueue.shift()!
-      
-      // Skip if already scraped
-      if (scrapedUrls.has(currentUrl)) continue
-      
-      // Create link entry for scraping (internal link)
-      const linkId = `${websiteId}-${allScrapedLinks.length}`
-      const newLink: ScrapedLink = {
-        id: linkId,
-        url: currentUrl,
-        type: 'internal',
-        status: 'scraping'
-      }
-      
-      allScrapedLinks.push(newLink)
-      setScrapedLinks([...allScrapedLinks])
-      setCurrentlyScraping(currentUrl)
-      
-      try {
-        const pageData = await scrapePage(currentUrl)
-        scrapedUrls.add(currentUrl)
-        
-        // Update link status to completed
-        const linkIndex = allScrapedLinks.findIndex(l => l.id === linkId)
-        if (linkIndex !== -1) {
-          allScrapedLinks[linkIndex].status = 'completed'
-          setScrapedLinks([...allScrapedLinks])
-        }
-        
-        // Add content to website data
-        currentWebsiteData.scraped_doc += '\n' + pageData.content
-        
-        // Process discovered links
-        const newInternalLinks = pageData.internalLinks.filter(url => !discoveredLinks.has(url))
-        const newExternalLinks = pageData.externalLinks.filter(url => !discoveredLinks.has(url))
-        
-        // Add to discovered links
-        newInternalLinks.forEach(url => discoveredLinks.add(url))
-        newExternalLinks.forEach(url => discoveredLinks.add(url))
-        
-        // Add external links to the scraped links list (but not for scraping - just for display)
-        newExternalLinks.forEach(extUrl => {
-          if (!allScrapedLinks.some(l => l.url === extUrl)) {
-            allScrapedLinks.push({
-              id: `${websiteId}-ext-${allScrapedLinks.length}`,
-              url: extUrl,
-              type: 'external',
-              status: 'completed' // Mark as completed but never actually scraped
-            })
-          }
-        })
-        setScrapedLinks([...allScrapedLinks])
-        
-        // Update website data links
-        currentWebsiteData.internal_links = [...new Set([...currentWebsiteData.internal_links, ...pageData.internalLinks])]
-        currentWebsiteData.external_links = [...new Set([...currentWebsiteData.external_links, ...pageData.externalLinks])]
-        
-        // Add only internal links to scrape queue (skip external links)
-        const newLinksToQueue = newInternalLinks
-          .filter(url => !scrapedUrls.has(url) && !toScrapeQueue.includes(url))
-        
-        toScrapeQueue.push(...newLinksToQueue)
-        
-        // Update available internal links only (for potential scraping)
-        const availableInternalLinks = Array.from(discoveredLinks)
-          .filter(url => {
-            try {
-              const urlHostname = new URL(url).hostname
-              return (urlHostname === hostname || urlHostname.endsWith(`.${hostname}`)) && 
-                     !scrapedUrls.has(url) && 
-                     !toScrapeQueue.includes(url)
-            } catch {
-              return false
-            }
-          })
-        setAvailableLinks(availableInternalLinks)
-        
-      } catch (error) {
-        const linkIndex = allScrapedLinks.findIndex(l => l.id === linkId)
-        if (linkIndex !== -1) {
-          allScrapedLinks[linkIndex].status = 'error'
-          setScrapedLinks([...allScrapedLinks])
-        }
-      }
-    }
-    
-    setWebsiteData(currentWebsiteData)
-    setCurrentlyScraping('')
-    console.log('Website Data:', currentWebsiteData)
-    console.log('Scraped Links:', allScrapedLinks)
-    console.log('Available Links:', Array.from(discoveredLinks).filter(url => !scrapedUrls.has(url)))
-    
-    // Store scraped data in AstraDB with embeddings
+    // Create URL selection object
+    const urlSelection: Record<string, boolean> = {}
+    scrapedLinks.forEach(link => {
+      urlSelection[link.url] = link.selected !== false // Default to true if undefined
+    })
+
     try {
-      const storeResponse = await fetch('http://localhost:3001/api/agent/store', {
+      const response = await fetch(`${backendUrl}/api/onboarding/selection`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          websiteId: currentWebsiteData.website_id,
-          websiteUrl: currentWebsiteData.website_url,
-          content: currentWebsiteData.scraped_doc,
+          stage: 2,
+          genieId: websiteData.genieId,
+          urls: urlSelection,
         }),
       })
-      
-      const storeResult = await storeResponse.json()
-      console.log('Stored in AstraDB:', storeResult)
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to save URL selection')
+      }
+
+      const result = await response.json()
+      console.log('✅ URL selection saved:', result)
+      return result
     } catch (error) {
-      console.error('Failed to store in AstraDB:', error)
+      console.error('❌ Failed to save URL selection:', error)
+      throw error
+    }
+  }
+
+  // Submit admin prompt selection (Stage 3)
+  const submitAdminPrompt = async () => {
+    if (!websiteData?.genieId) {
+      console.error('No genieId available for prompt selection')
+      return
+    }
+
+    if (!selectedPrompt) {
+      console.error('No prompt selected')
+      return
+    }
+
+    const backendUrl = getBackendUrl()
+
+    try {
+      const response = await fetch(`${backendUrl}/api/prompts/select`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          stage: 3,
+          genieId: websiteData.genieId,
+          promptId: selectedPrompt,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to save prompt selection')
+      }
+
+      const result = await response.json()
+      console.log('✅ Admin prompt saved:', result)
+      return result
+    } catch (error) {
+      console.error('❌ Failed to save admin prompt:', error)
+      throw error
+    }
+  }
+
+  // Submit custom prompt (Stage 3)
+  const submitCustomPrompt = async () => {
+    if (!websiteData?.genieId) {
+      console.error('No genieId available for custom prompt')
+      return
+    }
+
+    if (!customPrompt.trim()) {
+      console.error('No custom prompt entered')
+      return
+    }
+
+    const backendUrl = getBackendUrl()
+
+    try {
+      const response = await fetch(`${backendUrl}/api/prompts/custom`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          stage: 3,
+          genieId: websiteData.genieId,
+          userId: websiteData.website_id,
+          customPrompt: customPrompt.trim(),
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to save custom prompt')
+      }
+
+      const result = await response.json()
+      console.log('✅ Custom prompt saved:', result)
+      return result
+    } catch (error) {
+      console.error('❌ Failed to save custom prompt:', error)
+      throw error
     }
   }
 
@@ -297,23 +499,52 @@ export function Onboarding() {
       setCurrentStep('website')
     } else if (currentStep === 'website') {
       setIsLoading(true)
-      await scrapeWebsite(customWebsite)
-      setIsLoading(false)
-      setCurrentStep('scrape')
+      try {
+        await scrapeWebsiteStream(customWebsite)
+        setIsLoading(false)
+        setCurrentStep('scrape')
+      } catch (error) {
+        console.error('Scraping error:', error)
+        setIsLoading(false)
+        alert('Failed to scrape website. Please try again.')
+      }
     } else if (currentStep === 'scrape') {
-      setCurrentStep('prompt')
+      setIsLoading(true)
+      try {
+        // Send URL selection to backend (Stage 2)
+        await sendUrlSelection()
+        setIsLoading(false)
+        setCurrentStep('prompt')
+      } catch (error) {
+        console.error('URL selection error:', error)
+        setIsLoading(false)
+        alert('Failed to save URL selection. Please try again.')
+      }
     } else if (currentStep === 'prompt') {
       setIsLoading(true)
-      // Simulate agent configuration
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      setIsLoading(false)
-      setCurrentStep('deploy')
+      try {
+        // Submit prompt configuration (Stage 3)
+        if (selectedPrompt) {
+          // Admin prompt selected
+          await submitAdminPrompt()
+        } else if (customPrompt.trim()) {
+          // Custom prompt entered
+          await submitCustomPrompt()
+        } else {
+          throw new Error('Please select or enter a prompt')
+        }
+        setIsLoading(false)
+        setCurrentStep('deploy')
+      } catch (error) {
+        console.error('Prompt submission error:', error)
+        setIsLoading(false)
+        alert(error instanceof Error ? error.message : 'Failed to save prompt. Please try again.')
+      }
     }
   }
 
   const handleDeploy = async () => {
     setIsLoading(true)
-    // Simulate deployment
     await new Promise(resolve => setTimeout(resolve, 3000))
     setDeployedUrl('https://your-agent.example.com')
     setIsLoading(false)
@@ -359,12 +590,43 @@ export function Onboarding() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50">
-      {/* Fresh Navbar */}
       <OnboardingNavbar />
 
-      {/* Main Content */}
+      {/* GenieId Indicator */}
+      {(genieId || websiteData?.genieId) && (
+        <div className="max-w-6xl mx-auto px-4 pt-4">
+          <div className="bg-gradient-to-r from-emerald-100 to-emerald-50 border border-emerald-200 rounded-lg px-4 py-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bot className="w-4 h-4 text-emerald-700" />
+              <span className="text-sm font-medium text-emerald-900">
+                Genie ID: <span className="font-mono">{genieId || websiteData?.genieId}</span>
+              </span>
+            </div>
+            <div className="text-xs text-emerald-600">
+              ✓ Session Active
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GenieId Indicator */}
+      {(genieId || websiteData?.genieId) && (
+        <div className="max-w-6xl mx-auto px-4 pt-4">
+          <div className="bg-gradient-to-r from-emerald-100 to-emerald-50 border border-emerald-200 rounded-lg px-4 py-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bot className="w-4 h-4 text-emerald-700" />
+              <span className="text-sm font-medium text-emerald-900">
+                Genie ID: <span className="font-mono">{genieId || websiteData?.genieId}</span>
+              </span>
+            </div>
+            <div className="text-xs text-emerald-600">
+              ✓ Session Active
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        {/* Step 0: Introduction */}
         {currentStep === 'intro' && (
           <div className="space-y-12">
             <div className="text-center space-y-6 py-8">
@@ -393,17 +655,16 @@ export function Onboarding() {
                   <span>Create Your Agent</span>
                   <ArrowRight className="w-4 h-4" />
                 </Button>
-                  <Button
-                    variant="secondary" 
-                    className="px-8 py-3 border border-emerald-200 text-emerald-700 hover:bg-emerald-50 flex items-center"
-                  >
-                    <Code className="w-4 h-4 mr-2" />
-                    View Demo
-                  </Button>
+                <Button
+                  variant="secondary" 
+                  className="px-8 py-3 border border-emerald-200 text-emerald-700 hover:bg-emerald-50 flex items-center"
+                >
+                  <Code className="w-4 h-4 mr-2" />
+                  View Demo
+                </Button>
               </div>
             </div>
 
-            {/* Features Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="text-center p-6 hover:shadow-lg transition-all duration-300">
                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -438,11 +699,9 @@ export function Onboarding() {
           </div>
         )}
 
-        {/* Progress Steps */}
         {currentStep !== 'intro' && (
           <div className="w-full">
             <div className="flex items-center justify-between relative">
-              {/* Progress Line Background */}
               <div className="absolute top-4 left-8 right-8 h-1 bg-gray-200 rounded-full"></div>
               
               {(['website', 'scrape', 'prompt', 'deploy'] as OnboardingStep[]).map((step, index) => (
@@ -457,7 +716,7 @@ export function Onboarding() {
                     {isStepComplete(step) ? (
                       <Check className="w-4 h-4" />
                     ) : (
-                      <span className="text-xs font-bold">{index + 1}</span>
+                      <span className="text-xs font-bold">{getStepNumber(step)}</span>
                     )}
                   </div>
                   <span className={`mt-2 text-xs font-medium text-center ${
@@ -471,7 +730,6 @@ export function Onboarding() {
           </div>
         )}
 
-        {/* Step Content */}
         {currentStep !== 'intro' && (
           <Card className="shadow-lg border-0 bg-white">
             {currentStep !== 'website' && currentStep !== 'scrape' && (
@@ -488,19 +746,18 @@ export function Onboarding() {
               </div>
             )}
             <CardContent className="p-6 space-y-6">
-              {/* Step 1: Website Selection */}
               {currentStep === 'website' && !isLoading && (
                 <div className="space-y-6">
                   <div className="text-center space-y-3">
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">
-                      Create Your AI Agent
+                      Create Your AI Agents
                     </h2>
                     <p className="text-lg text-gray-600 max-w-xl mx-auto">
                       Enter your website URL or select from our pre-configured options
                     </p>
                   </div>
                   
-                  <div className=" mx-auto space-y-4">
+                  <div className="mx-auto space-y-4">
                     <div>
                       <Label htmlFor="custom-website" className="text-sm font-medium text-gray-700">
                         Enter your website URL
@@ -529,14 +786,14 @@ export function Onboarding() {
                             onClick={() => handleWebsiteSelect(site.id)}
                           >
                             <CardContent className="p-0">
-                              <div className="relative" style={{ aspectRatio: '5088/3852' }}>
+                              <div className="relative" style={{ aspectRatio: 1.32 }}>
                                 <img
                                   src={site.image}
                                   alt={site.name}
                                   className="w-full h-full object-cover rounded-t-lg"
                                 />
                                 <div className="absolute top-2 right-2">
-                                  <span className="px-2 py-1 text-xs bg-black/70 text-white rounded">
+                                  <span className="px-2 py-1 text-xs bg-gray-900 text-white rounded">
                                     {site.type}
                                   </span>
                                 </div>
@@ -557,7 +814,6 @@ export function Onboarding() {
                 </div>
               )}
 
-              {/* Step 2: Scraping & Link Management */}
               {currentStep === 'scrape' && (
                 <div className="space-y-6">
                   <div className="text-center space-y-3">
@@ -573,76 +829,136 @@ export function Onboarding() {
                     <div className="text-center space-y-4 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg p-4">
                       <div className="flex items-center justify-center gap-2 text-emerald-700">
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        <span className="text-lg font-semibold">Scraping Website...</span>
+                        <span className="text-lg font-semibold">Crawling Website...</span>
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm text-emerald-600 font-medium">
-                          Now scraping: {currentlyScraping}
+                          Current URL: {currentlyScraping}
                         </p>
+                        {streamMessages.length > 0 && (
+                          <p className="text-xs text-emerald-500">
+                            {streamMessages[streamMessages.length - 1]}
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
                   
-                  {/* Scraped Links Table */}
+                  {/* Crawl Statistics */}
+                  {crawlStats && !currentlyScraping && (
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center justify-center gap-4 text-sm">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-700">{crawlStats.pagesCrawled}</div>
+                          <div className="text-xs text-green-600">Pages Crawled</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-700">{crawlStats.totalUrls}</div>
+                          <div className="text-xs text-green-600">URLs Discovered</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-700">{crawlStats.duration.toFixed(2)}s</div>
+                          <div className="text-xs text-green-600">Duration</div>
+                        </div>
+                      </div>
+                      {websiteData?.genieId && (
+                        <div className="mt-2 text-center">
+                          <p className="text-xs text-green-600">
+                            Genie ID: <span className="font-mono font-semibold">{websiteData.genieId}</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Crawl Statistics */}
+                  {crawlStats && !currentlyScraping && (
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center justify-center gap-4 text-sm">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-700">{crawlStats.pagesCrawled}</div>
+                          <div className="text-xs text-green-600">Pages Crawled</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-700">{crawlStats.totalUrls}</div>
+                          <div className="text-xs text-green-600">URLs Discovered</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-700">{crawlStats.duration.toFixed(2)}s</div>
+                          <div className="text-xs text-green-600">Duration</div>
+                        </div>
+                      </div>
+                      {websiteData?.genieId && (
+                        <div className="mt-2 text-center">
+                          <p className="text-xs text-green-600">
+                            Genie ID: <span className="font-mono font-semibold">{websiteData.genieId}</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
                   {scrapedLinks.length > 0 && (
                     <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-center text-gray-700">
-                        Scraped Links ({scrapedLinks.filter(l => l.type === 'internal').length} internal / {scrapedLinks.filter(l => l.type === 'external').length} external)
-                      </h4>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-lg font-semibold text-gray-700">
+                          Scraped Links ({scrapedLinks.filter(l => l.selected !== false).length} selected / {scrapedLinks.length} total)
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSelectAll(true)}
+                            className="text-xs px-3 py-1"
+                          >
+                            Select All
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSelectAll(false)}
+                            className="text-xs px-3 py-1"
+                          >
+                            Deselect All
+                          </Button>
+                        </div>
+                      </div>
                       <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
                         <div className="overflow-x-auto">
                           <table className="w-full">
                             <thead className="bg-gray-50">
                               <tr>
+                                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 w-12">
+                                  <input
+                                    type="checkbox"
+                                    checked={scrapedLinks.every(link => link.selected !== false)}
+                                    onChange={(e) => handleSelectAll(e.target.checked)}
+                                    className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                  />
+                                </th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">URL</th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Type</th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
                                 <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 w-12">Action</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                              {scrapedLinks
-                                .sort((a, b) => {
-                                  // Internal links first, then external
-                                  if (a.type === 'internal' && b.type === 'external') return -1
-                                  if (a.type === 'external' && b.type === 'internal') return 1
-                                  return 0
-                                })
-                                .map((link) => (
-                                <tr key={link.id} className="hover:bg-gray-50 transition-colors">
+                              {scrapedLinks.map((link) => (
+                                <tr key={link.id} className={`hover:bg-gray-50 transition-colors ${link.selected === false ? 'opacity-50' : ''}`}>
+                                  <td className="px-4 py-3 text-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={link.selected !== false}
+                                      onChange={() => handleToggleLink(link.id)}
+                                      className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                    />
+                                  </td>
                                   <td className="px-4 py-3 font-mono text-xs max-w-xs truncate text-gray-700">
                                     {link.url}
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                                      link.type === 'internal' 
-                                        ? 'bg-blue-100 text-blue-700' 
-                                        : 'bg-purple-100 text-purple-700'
-                                    }`}>
-                                      {link.type}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                                      link.type === 'external'
-                                        ? 'bg-gray-100 text-gray-700'
-                                        : link.status === 'completed' 
-                                        ? 'bg-green-100 text-green-700' 
-                                        : link.status === 'scraping'
-                                        ? 'bg-yellow-100 text-yellow-700'
-                                        : link.status === 'error'
-                                        ? 'bg-red-100 text-red-700'
-                                        : 'bg-gray-100 text-gray-700'
-                                    }`}>
-                                      {link.type === 'external' ? 'reference' : link.status}
-                                    </span>
                                   </td>
                                   <td className="px-4 py-3 text-center">
                                     <Button
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => handleDeleteLink(link.id)}
-                                      disabled={link.status === 'scraping'}
                                       className="w-6 h-6 p-0 hover:bg-red-100 hover:text-red-600 flex items-center justify-center"
                                     >
                                       <X className="w-3 h-3" />
@@ -655,7 +971,46 @@ export function Onboarding() {
                         </div>
                       </div>
                       
-                      {/* Available Links to Add */}
+                      {/* Selection Summary */}
+                      {scrapedLinks.length > 0 && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="w-5 h-5 text-blue-600" />
+                              <span className="text-sm font-medium text-blue-900">
+                                {scrapedLinks.filter(l => l.selected !== false).length} URLs selected for training
+                              </span>
+                            </div>
+                            <span className="text-xs text-blue-600">
+                              {scrapedLinks.filter(l => l.selected === false).length} deselected
+                            </span>
+                          </div>
+                          <p className="text-xs text-blue-700 mt-2">
+                            Selected URLs will be used to train your AI agent. Click "Next" to continue.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {/* Selection Summary */}
+                      {scrapedLinks.length > 0 && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="w-5 h-5 text-blue-600" />
+                              <span className="text-sm font-medium text-blue-900">
+                                {scrapedLinks.filter(l => l.selected !== false).length} URLs selected for training
+                              </span>
+                            </div>
+                            <span className="text-xs text-blue-600">
+                              {scrapedLinks.filter(l => l.selected === false).length} deselected
+                            </span>
+                          </div>
+                          <p className="text-xs text-blue-700 mt-2">
+                            Selected URLs will be used to train your AI agent. Click "Next" to continue.
+                          </p>
+                        </div>
+                      )}
+                      
                       {availableLinks.length > 0 && scrapedLinks.length < SCRAPE_LIMIT && (
                         <div className="space-y-3">
                           <p className="text-sm text-gray-600 font-medium text-center">
@@ -684,7 +1039,6 @@ export function Onboarding() {
                 </div>
               )}
 
-              {/* Step 3: Prompt Selection */}
               {currentStep === 'prompt' && (
                 <div className="space-y-6">
                   <div className="max-w-2xl mx-auto space-y-6">
@@ -704,52 +1058,65 @@ export function Onboarding() {
                     <div className="text-center text-gray-500 text-sm">or</div>
 
                     <div>
-                      <Label className="text-sm font-medium text-gray-700">Choose a pre-built prompt</Label>
-                      <div className="space-y-3 mt-3">
-                        {SAMPLE_PROMPTS.map((prompt) => (
-                          <Card
-                            key={prompt.id}
-                            className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                              selectedPrompt === prompt.id ? 'ring-2 ring-emerald-500 bg-emerald-50' : ''
-                            }`}
-                            onClick={() => handlePromptSelect(prompt.id)}
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-center gap-2 mb-2">
-                                <MessageSquare className="w-4 h-4 text-emerald-600" />
-                                <span className="font-semibold text-lg">{prompt.title}</span>
-                              </div>
-                              <p className="text-gray-600 mb-3 text-sm">{prompt.description}</p>
-                              <div className="space-y-2">
-                                <span className="text-xs font-medium text-gray-700">Capabilities:</span>
-                                <div className="flex flex-wrap gap-1">
-                                  {prompt.capabilities.map((capability) => (
-                                    <span
-                                      key={capability}
-                                      className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-full font-medium"
-                                    >
-                                      {capability}
-                                    </span>
-                                  ))}
+                      <Label className="text-sm font-medium text-gray-700">Choose an admin prompt</Label>
+                      
+                      {isLoadingPrompts ? (
+                        <div className="flex items-center justify-center gap-2 text-gray-500 py-8">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-sm">Loading prompts...</span>
+                        </div>
+                      ) : adminPrompts.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500 text-sm">
+                          No admin prompts available
+                        </div>
+                      ) : (
+                        <div className="space-y-3 mt-3">
+                          {adminPrompts.map((prompt) => (
+                            <Card
+                              key={prompt.id}
+                              className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                                selectedPrompt === prompt.id ? 'ring-2 ring-emerald-500 bg-emerald-50' : ''
+                              }`}
+                              onClick={() => handlePromptSelect(prompt.id)}
+                            >
+                              <CardContent className="p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <MessageSquare className="w-4 h-4 text-emerald-600" />
+                                  <span className="text-xs font-medium text-emerald-600 uppercase">{prompt.tag}</span>
                                 </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
+                                <p className="text-gray-700 mb-3 text-sm leading-relaxed">{prompt.value}</p>
+                                {prompt.qualities && prompt.qualities.length > 0 && (
+                                  <div className="space-y-2">
+                                    <span className="text-xs font-medium text-gray-700">Qualities:</span>
+                                    <div className="flex flex-wrap gap-1">
+                                      {prompt.qualities.map((quality) => (
+                                        <span
+                                          key={quality.id}
+                                          className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-full font-medium"
+                                        >
+                                          {quality.value}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {isLoading && (
                       <div className="flex items-center justify-center gap-2 text-emerald-600 bg-emerald-50 rounded-lg p-4">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm font-medium">Configuring agent with selected prompt...</span>
+                        <span className="text-sm font-medium">Saving prompt configuration...</span>
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Step 4: Deploy & Test */}
               {currentStep === 'deploy' && (
                 <div className="space-y-6">
                   {!deployedUrl ? (
@@ -783,31 +1150,24 @@ export function Onboarding() {
 
                       <div className="text-center space-y-4">
                         <div className="relative max-w-4xl mx-auto">
-                          {/* Laptop Frame */}
                           <div className="relative bg-gray-800 rounded-t-xl p-4 shadow-lg">
-                            {/* Laptop Screen */}
-                            <div className="relative bg-black rounded-lg overflow-hidden" style={{ aspectRatio: '16/10' }}>
-                              {/* Screen Bezel */}
+                            <div className="relative bg-black rounded-lg overflow-hidden" style={{ aspectRatio: 1.6 }}>
                               <div className="absolute inset-0 bg-gray-900 rounded-lg p-1">
                                 <div className="w-full h-full bg-white rounded relative overflow-hidden">
-                                  {/* Website URL Display */}
                                   <div className="absolute top-2 left-2 bg-white px-2 py-1 rounded shadow-sm z-10">
                                     <span className="text-xs font-medium text-gray-600">
                                       {customWebsite.replace(/^https?:\/\//, '').replace(/^www\./, '')}
                                     </span>
                                   </div>
                                   
-                                  {/* AI Agent Badge */}
                                   <div className="absolute top-2 right-2 bg-gradient-to-r from-emerald-600 to-emerald-800 text-white px-2 py-1 rounded shadow-sm z-10">
                                     <span className="text-xs font-bold">AI Agent Active</span>
                                   </div>
                                   
-                                  {/* Chat Icon Simulation */}
                                   <div className="absolute bottom-3 right-3 w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:from-emerald-700 hover:to-emerald-900 transition-all duration-300 animate-pulse z-10">
                                     <MessageSquare className="w-4 h-4 text-white" />
                                   </div>
                                   
-                                  {/* Iframe */}
                                   <iframe
                                     src={customWebsite.startsWith('http') ? customWebsite : `https://${customWebsite}`}
                                     className="w-full h-full border-0"
@@ -818,17 +1178,14 @@ export function Onboarding() {
                               </div>
                             </div>
                             
-                            {/* Laptop Base */}
                             <div className="h-2 bg-gray-700 rounded-b-xl"></div>
                           </div>
                           
-                          {/* Expand Button */}
                           <div className="text-center mt-4">
                             <Button 
                               variant="outline" 
                               onClick={() => {
                                 const encodedUrl = encodeURIComponent(customWebsite.startsWith('http') ? customWebsite : `https://${customWebsite}`)
-                                // Store websiteId in localStorage for the preview page
                                 if (websiteData) {
                                   localStorage.setItem('currentWebsiteId', websiteData.website_id)
                                 }
@@ -847,7 +1204,6 @@ export function Onboarding() {
                 </div>
               )}
 
-              {/* Navigation Buttons */}
               {currentStep !== 'deploy' && (
                 <div className="flex justify-between pt-6 border-t border-gray-200">
                   <Button

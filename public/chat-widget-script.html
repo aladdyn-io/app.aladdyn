@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aladdyn Chat Widget</title>
+    <style>
+        .aladdyn-chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #43a047, #1b5e20);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .aladdyn-chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        
+        .aladdyn-chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            z-index: 1001;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .aladdyn-chat-header {
+            background: #0d47a1;
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .aladdyn-chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+        
+        .aladdyn-message {
+            margin-bottom: 12px;
+            display: flex;
+        }
+        
+        .aladdyn-message.user {
+            justify-content: flex-end;
+        }
+        
+        .aladdyn-message-bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        
+        .aladdyn-message.bot .aladdyn-message-bubble {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        
+        .aladdyn-message.user .aladdyn-message-bubble {
+            background: linear-gradient(135deg, #43a047, #1b5e20);
+            color: white;
+        }
+        
+        .aladdyn-chat-input {
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .aladdyn-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+        }
+        
+        .aladdyn-send-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #43a047, #1b5e20);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .aladdyn-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Chat Button -->
+    <button id="aladdynChatButton" class="aladdyn-chat-button">💬</button>
+    
+    <!-- Chat Widget -->
+    <div id="aladdynChatWidget" class="aladdyn-chat-widget">
+        <div class="aladdyn-chat-header">
+            <div>
+                <div style="font-weight: bold;">Support Bot</div>
+                <div style="font-size: 12px; opacity: 0.8;">Always online</div>
+            </div>
+            <button id="aladdynCloseBtn" class="aladdyn-close-btn">×</button>
+        </div>
+        
+        <div id="aladdynMessages" class="aladdyn-chat-messages">
+            <div class="aladdyn-message bot">
+                <div class="aladdyn-message-bubble">Hi! How can I help you today?</div>
+            </div>
+        </div>
+        
+        <div class="aladdyn-chat-input">
+            <input id="aladdynInput" class="aladdyn-input" type="text" placeholder="Type your message...">
+            <button id="aladdynSendBtn" class="aladdyn-send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const chatButton = document.getElementById('aladdynChatButton');
+            const chatWidget = document.getElementById('aladdynChatWidget');
+            const closeBtn = document.getElementById('aladdynCloseBtn');
+            const sendBtn = document.getElementById('aladdynSendBtn');
+            const input = document.getElementById('aladdynInput');
+            const messagesContainer = document.getElementById('aladdynMessages');
+            
+            let isOpen = false;
+            
+            function toggleChat() {
+                isOpen = !isOpen;
+                chatWidget.style.display = isOpen ? 'flex' : 'none';
+                chatButton.style.display = isOpen ? 'none' : 'flex';
+            }
+            
+            function addMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `aladdyn-message ${sender}`;
+                messageDiv.innerHTML = `<div class="aladdyn-message-bubble">${text}</div>`;
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            function sendMessage() {
+                const text = input.value.trim();
+                if (!text) return;
+                
+                addMessage(text, 'user');
+                input.value = '';
+                
+                // Simulate bot response
+                setTimeout(() => {
+                    addMessage('Thanks for your message! How else can I assist you?', 'bot');
+                }, 1000);
+            }
+            
+            // Event listeners
+            chatButton.addEventListener('click', toggleChat);
+            closeBtn.addEventListener('click', toggleChat);
+            sendBtn.addEventListener('click', sendMessage);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            
+            // API integration (customize as needed)
+            window.AladdynChat = {
+                open: () => {
+                    if (!isOpen) toggleChat();
+                },
+                close: () => {
+                    if (isOpen) toggleChat();
+                },
+                sendMessage: (text) => {
+                    addMessage(text, 'bot');
+                }
+            };
+        })();
+    </script>
+</body>
+</html>

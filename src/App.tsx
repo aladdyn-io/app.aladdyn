@@ -38,6 +38,7 @@ function App() {
         
         {/* Onboarding page without layout */}
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/onboarding/:genieId" element={<Onboarding />} />
         
         {/* Preview page without layout */}
         <Route path="/preview/:url" element={<Preview />} />

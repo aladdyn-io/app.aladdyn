@@ -20,6 +20,7 @@ export function Preview() {
   const [inputValue, setInputValue] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [websiteId, setWebsiteId] = useState('')
+  const [genieId, setGenieId] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -39,9 +40,18 @@ export function Preview() {
     const decoded = decodeURIComponent(url)
     setDecodedUrl(decoded)
     
-    // Get websiteId from localStorage or generate new one
-    const storedId = localStorage.getItem('currentWebsiteId')
-    setWebsiteId(storedId || Date.now().toString())
+    // Get websiteId and genieId from localStorage
+    const storedWebsiteId = localStorage.getItem('currentWebsiteId')
+    const storedGenieId = localStorage.getItem('currentGenieId')
+    
+    setWebsiteId(storedWebsiteId || Date.now().toString())
+    setGenieId(storedGenieId || '')
+    
+    console.log('📋 Preview loaded:', {
+      websiteId: storedWebsiteId,
+      genieId: storedGenieId,
+      url: decoded
+    })
     
     // Simulate loading
     const timer = setTimeout(() => {
@@ -71,25 +81,42 @@ export function Preview() {
     setIsSending(true)
 
     try {
-      // Call chat API
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      // Call chat API with genieId
+      const backendUrl = import.meta.env.VITE_GENIE_BACKEND_URL;
+      
+      if (!backendUrl) {
+        throw new Error('Backend URL not configured. Please set VITE_GENIE_BACKEND_URL environment variable.')
+      }
+      
+      console.log('💬 Sending chat message:', {
+        genieId,
+        websiteId,
+        query: inputValue
+      })
+      
       const response = await fetch(`${backendUrl}/api/agent/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          genieId: genieId || websiteId,
           websiteId: websiteId,
           query: inputValue,
         }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `API error: ${response.status}`)
+      }
 
       const data = await response.json()
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.response || 'Sorry, I could not generate a response.',
+        content: data.response || data.answer || 'Sorry, I could not generate a response.',
         timestamp: new Date(),
       }
 
@@ -99,7 +126,7 @@ export function Preview() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: error instanceof Error ? error.message : 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])
@@ -162,18 +189,25 @@ export function Preview() {
       {isChatOpen ? (
         <div className="fixed bottom-4 right-4 z-20 w-72 h-80 flex flex-col">
           <Card className="h-full flex flex-col shadow-2xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b shrink-0">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Bot className="w-4 h-4 text-emerald-600" />
-                AI Agent
-              </CardTitle>
-              <Button
-                variant="ghost"
-                onClick={() => setIsChatOpen(false)}
-                className="p-1 h-6 w-6 flex items-center justify-center"
-              >
-                <X className="w-3 h-3" />
-              </Button>
+            <CardHeader className="flex flex-col space-y-1 pb-2 border-b shrink-0">
+              <div className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Bot className="w-4 h-4 text-emerald-600" />
+                  AI Agent
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsChatOpen(false)}
+                  className="p-1 h-6 w-6 flex items-center justify-center"
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+              {genieId && (
+                <div className="text-[10px] text-gray-500 font-mono truncate">
+                  ID: {genieId.substring(0, 12)}...
+                </div>
+              )}
             </CardHeader>
             <CardContent className="flex-1 flex flex-col p-0 overflow-hidden min-h-0">
               {/* Messages */}

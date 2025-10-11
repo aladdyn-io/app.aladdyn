@@ -49,6 +49,22 @@ export function Avatar({
   )
 }
 
+export function AvatarImage({
+  src,
+  alt,
+  ...props
+}: React.ImgHTMLAttributes<HTMLImageElement>) {
+  return (
+    <img
+      src={src}
+      alt={alt ?? ""}
+      className="w-full h-full object-cover"
+      draggable={false}
+      {...props}
+    />
+  )
+}
+
 export function AvatarFallback({
   children,
   ...props

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Button } from '@/ui/components/ui/button'
-import { Input } from '@/ui/components/ui/input'
 import { Bot, Sparkles, Zap, Loader2, X, ArrowRight, Check } from 'lucide-react'
 import { showRegisterSuccess, showRegisterError } from '@/ui/utils/toast'
 import { WebsiteSelector, SAMPLE_WEBSITES } from '@/ui/components/WebsiteSelector'

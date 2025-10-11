@@ -1,17 +1,17 @@
-import { RotateCcw, MessageSquare, X, Send, Bot, User, Settings, Eye } from 'lucide-react';
+import { Send, Bot, Eye } from 'lucide-react';
 import { Button } from '@/ui/components/Button';
 import { Input } from '@/ui/components/Input';
 import { useState, useEffect } from 'react';
 
 export function GenieScripts() {
   const [previewUrl, setPreviewUrl] = useState('https://elanenterprises.in/');
-  const [textareaValue, setTextareaValue] = useState('');
-  const [showChatbot, setShowChatbot] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [textareaValue] = useState('');
+  const [_showChatbot, setShowChatbot] = useState(false);
+  const [_isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState<Array<{id: string, role: 'user' | 'assistant', content: string}>>([]);
   const [inputValue, setInputValue] = useState('');
   const [activeView, setActiveView] = useState<'chat' | 'website' | 'preview'>('preview');
-  const [config, setConfig] = useState({
+  const [,] = useState({
     botName: 'Support Bot',
     botStatus: 'Always online',
     headerBg: '#0d47a1',

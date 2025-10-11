@@ -70,7 +70,7 @@ function App() {
         
         {/* Genie section with GenieSidebarLayout */}
         <Route path="/genie/*" element={
-          <GenieSidebarLayout>
+          <GenieSidebarLayout >
             <Routes>
               <Route path="/" element={<GenieDashboard />} />
               <Route path="/:genieId" element={<GenieDashboard />} />

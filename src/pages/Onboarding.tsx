@@ -704,7 +704,7 @@ export function Onboarding() {
             <div className="flex items-center justify-between relative">
               <div className="absolute top-4 left-8 right-8 h-1 bg-gray-200 rounded-full"></div>
               
-              {(['website', 'scrape', 'prompt', 'deploy'] as OnboardingStep[]).map((step, index) => (
+              {(['website', 'scrape', 'prompt', 'deploy'] as OnboardingStep[]).map((step) => (
                 <div key={step} className="flex flex-col items-center relative z-10">
                   <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
                     currentStep === step 

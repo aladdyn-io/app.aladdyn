@@ -20,11 +20,12 @@ import {
   GenieScripts,
   GenieSettings,
   ChatLogs,
-  Widget
+  Widget,
+  DashboardV2
 } from '@/pages';
 import { HomeSidebarLayout } from '@/ui/layouts/HomeSidebarLayout';
 import { GenieSidebarLayout } from '@/ui/layouts/GenieSidebarLayout';
-import { Toaster } from '@/ui/components/ui/sonner';
+import { Toaster } from '@/components/ui/sonner';
 
 function App() {
   return (
@@ -48,6 +49,9 @@ function App() {
         
         {/* Pricing page without layout */}
         <Route path="/pricing" element={<Pricing />} />
+        
+        {/* Dashboard V2 page without layout */}
+        <Route path="/dashboard-v2" element={<DashboardV2 />} />
         
         {/* Home section with HomeSidebarLayout */}
         <Route path="/home/*" element={

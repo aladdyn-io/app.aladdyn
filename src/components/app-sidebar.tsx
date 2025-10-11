@@ -1,25 +1,21 @@
-"use client"
-
 import * as React from "react"
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
-  IconPlus,
-  IconInbox,
-} from "@tabler/icons-react"
+  ArrowUpCircleIcon,
+  BarChartIcon,
+  CameraIcon,
+  ClipboardListIcon,
+  DatabaseIcon,
+  FileCodeIcon,
+  FileIcon,
+  FileTextIcon,
+  FolderIcon,
+  HelpCircleIcon,
+  LayoutDashboardIcon,
+  ListIcon,
+  SearchIcon,
+  SettingsIcon,
+  UsersIcon,
+} from "lucide-react"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
@@ -41,49 +37,37 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  quickActions: [
-    {
-      title: "Quick Create",
-      url: "#",
-      icon: IconPlus,
-    },
-    {
-      title: "Inbox",
-      url: "#",
-      icon: IconInbox,
-    },
-  ],
   navMain: [
     {
       title: "Dashboard",
       url: "#",
-      icon: IconDashboard,
+      icon: LayoutDashboardIcon,
     },
     {
       title: "Lifecycle",
       url: "#",
-      icon: IconListDetails,
+      icon: ListIcon,
     },
     {
       title: "Analytics",
       url: "#",
-      icon: IconChartBar,
+      icon: BarChartIcon,
     },
     {
       title: "Projects",
       url: "#",
-      icon: IconFolder,
+      icon: FolderIcon,
     },
     {
       title: "Team",
       url: "#",
-      icon: IconUsers,
+      icon: UsersIcon,
     },
   ],
   navClouds: [
     {
       title: "Capture",
-      icon: IconCamera,
+      icon: CameraIcon,
       isActive: true,
       url: "#",
       items: [
@@ -99,7 +83,7 @@ const data = {
     },
     {
       title: "Proposal",
-      icon: IconFileDescription,
+      icon: FileTextIcon,
       url: "#",
       items: [
         {
@@ -114,7 +98,7 @@ const data = {
     },
     {
       title: "Prompts",
-      icon: IconFileAi,
+      icon: FileCodeIcon,
       url: "#",
       items: [
         {
@@ -132,34 +116,34 @@ const data = {
     {
       title: "Settings",
       url: "#",
-      icon: IconSettings,
+      icon: SettingsIcon,
     },
     {
       title: "Get Help",
       url: "#",
-      icon: IconHelp,
+      icon: HelpCircleIcon,
     },
     {
       title: "Search",
       url: "#",
-      icon: IconSearch,
+      icon: SearchIcon,
     },
   ],
   documents: [
     {
       name: "Data Library",
       url: "#",
-      icon: IconDatabase,
+      icon: DatabaseIcon,
     },
     {
       name: "Reports",
       url: "#",
-      icon: IconReport,
+      icon: ClipboardListIcon,
     },
     {
       name: "Word Assistant",
       url: "#",
-      icon: IconFileWord,
+      icon: FileIcon,
     },
   ],
 }
@@ -175,15 +159,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Aladdyn</span>
+                <ArrowUpCircleIcon className="h-5 w-5" />
+                <span className="text-base font-semibold">Acme Inc.</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.quickActions} />
         <NavMain items={data.navMain} />
         <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />

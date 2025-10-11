@@ -6,6 +6,7 @@ export { Onboarding } from './Onboarding';
 export { Preview } from './Preview';
 export { Pricing } from './Pricing';
 export { default as Widget } from './Widget';
+export { default as DashboardV2 } from './DashboardV2';
 
 // Home section pages
 export { 

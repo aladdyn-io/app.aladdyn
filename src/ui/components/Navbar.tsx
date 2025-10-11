@@ -9,6 +9,9 @@ export function Navbar() {
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+  
+  // Determine sidebar margin based on current route
+  const sidebarMargin = location.pathname.startsWith('/genie') ? 'ml-64' : 'ml-64';
 
   const projects = [
     { 
@@ -49,7 +52,7 @@ export function Navbar() {
 
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 lg:ml-64">
+    <nav className={`bg-white shadow-sm border-b border-gray-200 ${sidebarMargin}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center space-x-6">

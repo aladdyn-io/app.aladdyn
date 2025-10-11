@@ -9,9 +9,15 @@ import {
   ChartBarIcon,
   BellIcon,
   XMarkIcon,
-  Bars3Icon
+  Bars3Icon,
+  PlusIcon,
+  EnvelopeIcon,
+  LifebuoyIcon,
+  FolderIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 import { cn } from '@/ui/utils/cn';
+import { QuickCreateDialog } from '@/ui/components/QuickCreateDialog';
 
 interface SidebarItem {
   name: string;
@@ -20,21 +26,19 @@ interface SidebarItem {
   current?: boolean;
 }
 
-const quickActions: SidebarItem[] = [
-  { name: 'Quick Create', href: '/home/quick-create', icon: HomeIcon },
-  { name: 'Inbox', href: '/home/inbox', icon: InformationCircleIcon },
-];
-
 const navigation: SidebarItem[] = [
   { name: 'Dashboard', href: '/home', icon: HomeIcon },
-  { name: 'Lifecycle', href: '/home/lifecycle', icon: Cog6ToothIcon },
+  { name: 'Lifecycle', href: '/home/lifecycle', icon: LifebuoyIcon },
   { name: 'Analytics', href: '/home/analytics', icon: ChartBarIcon },
-  { name: 'Projects', href: '/home/projects', icon: DocumentTextIcon },
-  { name: 'Team', href: '/home/team', icon: UserIcon },
-  { name: 'Documents', href: '/home/documents', icon: DocumentTextIcon },
-  { name: 'Data Library', href: '/home/data-library', icon: BellIcon },
+  { name: 'Projects', href: '/home/projects', icon: FolderIcon },
+  { name: 'Team', href: '/home/team', icon: UsersIcon },
+];
+
+const documentsNavigation: SidebarItem[] = [
+  { name: 'Data Library', href: '/home/data-library', icon: DocumentTextIcon },
   { name: 'Reports', href: '/home/reports', icon: ChartBarIcon },
   { name: 'Word Assistant', href: '/home/word-assistant', icon: DocumentTextIcon },
+  { name: 'More', href: '/home/more', icon: BellIcon },
 ];
 
 interface SidebarProps {
@@ -44,10 +48,11 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false);
 
   const isCurrentPath = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
+    if (path === '/home') {
+      return location.pathname === '/home' || location.pathname === '/home/';
     }
     return location.pathname.startsWith(path);
   };
@@ -57,7 +62,7 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Mobile sidebar */}
       <div className={cn('lg:hidden', sidebarOpen ? 'fixed inset-0 z-50' : 'hidden')}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="relative flex w-full max-w-xs flex-1 flex-col bg-white">
+        <div className="relative flex w-full max-w-xs flex-1 flex-col bg-[#111]">
           <div className="absolute top-0 right-0 -mr-12 pt-2">
             <button
               type="button"
@@ -80,39 +85,55 @@ export function Sidebar({ className }: SidebarProps) {
 
   function SidebarContent() {
     return (
-      <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-white to-emerald-50 px-6 shadow-xl border-r border-emerald-100">
-        <div className="flex h-16 shrink-0 items-center border-b border-emerald-100">
+      <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-[#111] px-6">
+        {/* Organization Header */}
+        <div className="flex h-16 shrink-0 items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-800 rounded-xl flex items-center justify-center shadow-lg ring-2 ring-emerald-200 ring-opacity-50">
-              <img src="/gene.png" alt="Aladdyn" className="w-12 h-12 object-contain drop-shadow-sm" />
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <span className="text-sm font-bold text-gray-900">A</span>
             </div>
-            <div>
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">Aladdyn</span>
-              <div className="text-xs text-emerald-600 font-medium">Home Workspace</div>
-            </div>
+            <span className="text-lg font-semibold text-white">Acme Inc.</span>
           </div>
         </div>
+        
+        {/* Quick Create Button */}
+        <button 
+          onClick={() => setQuickCreateOpen(true)}
+          className="flex items-center justify-between w-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors duration-200"
+        >
+          <div className="flex items-center space-x-3">
+            <PlusIcon className="h-5 w-5" />
+            <span className="font-medium">Quick Create</span>
+          </div>
+          <EnvelopeIcon className="h-4 w-4 text-gray-400" />
+        </button>
+        
+        {/* Quick Create Dialog */}
+        <QuickCreateDialog 
+          open={quickCreateOpen} 
+          onOpenChange={setQuickCreateOpen} 
+        />
         <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
-            {/* Quick Actions */}
+            {/* Main Navigation */}
             <li>
-              <ul role="list" className="-mx-2 space-y-1">
-                {quickActions.map((item) => (
+              <ul role="list" className="space-y-1">
+                {navigation.map((item) => (
                   <li key={item.name}>
                     <Link
                       to={item.href}
                       className={cn(
                         isCurrentPath(item.href)
-                          ? 'bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-800 shadow-sm'
-                          : 'text-gray-700 hover:text-emerald-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100',
-                        'group flex gap-x-3 rounded-lg p-2 text-sm leading-6 font-medium transition-all duration-200 hover:shadow-sm'
+                          ? 'bg-gray-800 text-white'
+                          : 'text-gray-300 hover:text-white hover:bg-gray-800',
+                        'group flex gap-x-3 rounded-lg p-3 text-sm font-medium transition-all duration-200'
                       )}
                     >
                       <item.icon
                         className={cn(
                           isCurrentPath(item.href)
-                            ? 'text-emerald-700 drop-shadow-sm'
-                            : 'text-gray-400 group-hover:text-emerald-600',
+                            ? 'text-white'
+                            : 'text-gray-400 group-hover:text-white',
                           'h-5 w-5 shrink-0 transition-colors duration-200'
                         )}
                         aria-hidden="true"
@@ -124,104 +145,39 @@ export function Sidebar({ className }: SidebarProps) {
               </ul>
             </li>
             
-            {/* Main Navigation */}
+            {/* Documents Section */}
             <li>
-              <ul role="list" className="-mx-2 space-y-1">
-                {navigation.map((item) => (
+              <div className="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-3">
+                Documents
+              </div>
+              <ul role="list" className="space-y-1">
+                {documentsNavigation.map((item) => (
                   <li key={item.name}>
                     <Link
                       to={item.href}
                       className={cn(
                         isCurrentPath(item.href)
-                          ? 'bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-800 shadow-sm'
-                          : 'text-gray-700 hover:text-emerald-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100',
-                        'group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium transition-all duration-200 hover:shadow-sm'
+                          ? 'bg-gray-800 text-white'
+                          : 'text-gray-300 hover:text-white hover:bg-gray-800',
+                        'group flex gap-x-3 rounded-lg p-3 text-sm font-medium transition-all duration-200'
                       )}
                     >
                       <item.icon
                         className={cn(
                           isCurrentPath(item.href)
-                            ? 'text-emerald-700 drop-shadow-sm'
-                            : 'text-gray-400 group-hover:text-emerald-600',
-                          'h-6 w-6 shrink-0 transition-colors duration-200'
+                            ? 'text-white'
+                            : 'text-gray-400 group-hover:text-white',
+                          'h-5 w-5 shrink-0 transition-colors duration-200'
                         )}
                         aria-hidden="true"
                       />
                       {item.name}
-                      {(item.name === 'Data Library' || item.name === 'Reports' || item.name === 'Word Assistant') && (
-                        <span className="ml-auto text-xs text-gray-400">More</span>
-                      )}
                     </Link>
                   </li>
                 ))}
-                <li>
-                  <Link
-                    to="/home/more"
-                    className="group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium transition-all duration-200 hover:shadow-sm text-gray-700 hover:text-emerald-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100"
-                  >
-                    <BellIcon
-                      className="h-6 w-6 shrink-0 transition-colors duration-200 text-gray-400 group-hover:text-emerald-600"
-                      aria-hidden="true"
-                    />
-                    More
-                  </Link>
-                </li>
               </ul>
             </li>
           </ul>
-
-            {/* Usage Component */}
-            <div className="px-0 py-6 border-t border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100 -mx-6">
-              <div className="px-6 space-y-4">
-                {/* Plan Info */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-semibold text-emerald-800">Pro Plan</span>
-                  </div>
-                  <div className="px-2 py-1 bg-emerald-200 text-emerald-800 text-xs font-medium rounded-full">
-                    Active
-                  </div>
-                </div>
-                
-                {/* Usage Bar */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-700 font-medium">Monthly Usage</span>
-                    <span className="text-emerald-700 font-bold">8,500 / 10,000</span>
-                  </div>
-                  <div className="relative">
-                    <div className="w-full bg-white rounded-full h-3 shadow-inner">
-                      <div 
-                        className="bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 h-3 rounded-full transition-all duration-500 ease-out shadow-lg relative overflow-hidden" 
-                        style={{ width: '85%' }}
-                      >
-                      </div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>0</span>
-                      <span className="font-medium">85%</span>
-                      <span>10K</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Upgrade Button */}
-                <button className="group w-full bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 text-white text-sm font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                  <span className="relative flex items-center justify-center space-x-2">
-                    <span>Upgrade to Premium</span>
-                  </span>
-                </button>
-                
-                {/* Additional Info */}
-                <div className="text-center">
-                  <p className="text-xs text-gray-600">
-                    1,500 requests remaining this month
-                  </p>
-                </div>
-              </div>
-            </div>
         </nav>
       </div>
     );

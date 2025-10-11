@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot Widget Test — Live Preview</title>
+    <style>
+        * { box-sizing: border-box; }
+        html,body { height: 100%; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f172a;
+            color: #0f172a;
+            min-height: 100vh;
+            padding: 24px;
+            display: flex;
+            align-items: stretch;
+            gap: 24px;
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.04);
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+        }
+
+        .left { width: 420px; min-width: 320px; max-height: calc(100vh - 48px); overflow:auto }
+        .right { flex: 1; display:flex; align-items:center; justify-content:center }
+
+        h1 { font-size: 20px; margin-bottom: 8px; color: #f8fafc }
+        p.lead { margin-bottom: 16px; color: #cbd5e1 }
+
+        .field { margin-bottom: 12px; }
+        label { display:block; font-size: 13px; color: #cbd5e1; margin-bottom:6px }
+        input[type="text"], input[type="url"], textarea {
+            width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(15,23,42,0.08);
+            background: #fff; font-size:14px;
+        }
+
+        textarea { min-height:60px; resize:vertical }
+
+        .row { display:flex; gap:8px }
+        .row .col { flex:1 }
+
+        .iframe-wrap {
+            background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+            padding: 24px; border-radius: 16px; display:flex; align-items:end; justify-content:end;
+            width: 100%; height: calc(100vh - 48px); overflow: auto;
+        }
+
+        iframe.preview {
+            width: 400px; height: 640px; border: none; border-radius: 16px; box-shadow: 0 8px 40px rgba(2,6,23,0.4);
+            background: white;
+        }
+
+        .meta { font-size:12px; color:#94a3b8; margin-top:8px }
+        .controls-footer { display:flex; gap:8px; margin-top:12px }
+        button { padding:8px 12px; border-radius:8px; border:none; cursor:pointer }
+        button.primary { background: #111827; color: #fff }
+        button.ghost { background: transparent; color: #cbd5e1; border:1px solid rgba(255,255,255,0.04) }
+    </style>
+</head>
+<body>
+    <div class="left panel">
+        <h1>Chatbot Preview Controls</h1>
+        <p class="lead">Edit values below to update the preview on the right in real time. Complex values (gradients) will be URL-encoded automatically.</p>
+
+            <div class="field">
+                <label for="iframeUrl">Source / Base URL</label>
+                <input id="iframeUrl" type="url" value="https://ai-chat-widget-production.up.railway.app/" />
+                <div class="meta">Change only if you host the widget on a different URL.</div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="botName">Bot Name</label>
+                    <input id="botName" type="text" />
+                </div>
+                <div class="col field">
+                    <label for="botStatus">Bot Status</label>
+                    <input id="botStatus" type="text" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="headerBg">Header Background</label>
+                                        <input id="headerBg" type="text" placeholder="#0d47a1" />
+                                        <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+                                            <input id="headerBgColor" type="color" value="#0d47a1" title="Pick header bg color" />
+                                            <small style="color:#94a3b8">Use color picker or enter CSS value above</small>
+                                        </div>
+                </div>
+                <div class="col field">
+                    <label for="headerText">Header Text Color</label>
+                                        <input id="headerText" type="text" placeholder="#ffffff" />
+                                        <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+                                            <input id="headerTextColor" type="color" value="#ffffff" title="Pick header text color" />
+                                            <small style="color:#94a3b8">Or enter hex above</small>
+                                        </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="botBubbleBg">Bot Bubble Background</label>
+                    <input id="botBubbleBg" type="text" placeholder="#e3f2fd" />
+                </div>
+                <div class="col field">
+                    <label for="botBubbleText">Bot Bubble Text</label>
+                    <input id="botBubbleText" type="text" placeholder="#0d47a1" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="userBubbleBg">User Bubble Background</label>
+                    <input id="userBubbleBg" type="text" placeholder="linear-gradient(135deg, #43a047, #1b5e20)" />
+                    <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+                      <input id="userBubbleColor1" type="color" value="#43a047" title="Pick user bubble color 1" />
+                      <input id="userBubbleColor2" type="color" value="#1b5e20" title="Pick user bubble color 2" />
+                      <input id="userBubbleAngle" type="number" value="135" min="0" max="360" style="width:72px" />
+                      <label style="color:#94a3b8;font-size:12px"><input id="userBubbleUseGradient" type="checkbox" checked /> gradient</label>
+                    </div>
+                </div>
+                <div class="col field">
+                    <label for="userBubbleText">User Bubble Text</label>
+                    <input id="userBubbleText" type="text" placeholder="#ffffff" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="bgFrom">Page Background Start (bgFrom)</label>
+                                        <input id="bgFrom" type="text" placeholder="#e3f2fd" />
+                                        <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+                                            <input id="bgFromColor" type="color" value="#e3f2fd" />
+                                        </div>
+                </div>
+                <div class="col field">
+                    <label for="bgTo">Page Background End (bgTo)</label>
+                                        <input id="bgTo" type="text" placeholder="#ede7f6" />
+                                        <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+                                            <input id="bgToColor" type="color" value="#ede7f6" />
+                                        </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="chatBg">Chat Container Background (chatBg)</label>
+                <input id="chatBg" type="text" placeholder="linear-gradient(135deg, #e3f2fd, #ede7f6)" />
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="fontSize">Font Size</label>
+                    <input id="fontSize" type="text" placeholder="16px" />
+                </div>
+                <div class="col field">
+                    <label for="fontFamily">Font Family</label>
+                    <input id="fontFamily" type="text" placeholder="'Segoe UI', Roboto, sans-serif" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="botAvatar">Bot Avatar URL</label>
+                    <input id="botAvatar" type="text" placeholder="https://..." />
+                </div>
+                <div class="col field">
+                    <label for="userAvatar">User Avatar URL</label>
+                    <input id="userAvatar" type="text" placeholder="https://..." />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="inputBg">Input Background</label>
+                    <input id="inputBg" type="text" placeholder="#ffffff" />
+                </div>
+                <div class="col field">
+                    <label for="inputBorder">Input Border (CSS)</label>
+                    <input id="inputBorder" type="text" placeholder="1px solid #64b5f6" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="inputText">Input Text Color</label>
+                    <input id="inputText" type="text" placeholder="#212121" />
+                </div>
+                <div class="col field">
+                    <label for="inputPlaceholder">Input Placeholder Color</label>
+                    <input id="inputPlaceholder" type="text" placeholder="#9e9e9e" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="buttonBg">Button Background (CSS)</label>
+                    <input id="buttonBg" type="text" placeholder="linear-gradient(135deg, #43a047, #1b5e20)" />
+                    <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+                      <input id="buttonColor1" type="color" value="#43a047" />
+                      <input id="buttonColor2" type="color" value="#1b5e20" />
+                      <input id="buttonAngle" type="number" value="135" min="0" max="360" style="width:72px" />
+                      <label style="color:#94a3b8;font-size:12px"><input id="buttonUseGradient" type="checkbox" checked /> gradient</label>
+                    </div>
+                </div>
+                <div class="col field">
+                    <label for="buttonText">Button Text Color</label>
+                    <input id="buttonText" type="text" placeholder="#ffffff" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="buttonShadow">Button Shadow (CSS)</label>
+                    <input id="buttonShadow" type="text" placeholder="0px 2px 6px rgba(76, 175, 80, 0.3)" />
+                </div>
+                <div class="col field">
+                    <label for="buttonHover">Button Hover Background</label>
+                    <input id="buttonHover" type="text" placeholder="linear-gradient(135deg, #388e3c, #2e7d32)" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="borderRadius">Border Radius</label>
+                    <input id="borderRadius" type="text" placeholder="12px" />
+                </div>
+                <div class="col field">
+                    <label for="shadow">Box Shadow</label>
+                    <input id="shadow" type="text" placeholder="0 4px 12px rgba(0,0,0,0.15)" />
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="welcomeMessage">Welcome Message</label>
+                <textarea id="welcomeMessage" placeholder="Hi! How can I help you today?"></textarea>
+            </div>
+
+            <div class="field">
+                <label for="placeholder">Input Placeholder Text</label>
+                <input id="placeholder" type="text" placeholder="Type your message..." />
+            </div>
+
+        <div class="controls-footer">
+            <button id="applyBtn" class="primary">Apply Now</button>
+            <button id="resetBtn" class="ghost">Reset</button>
+        </div>
+
+        <div class="field" style="margin-top:16px">
+            <label>Live iframe src (encoded)</label>
+            <textarea id="encodedSrc" readonly></textarea>
+        </div>
+    </div>
+
+    <div class="right">
+        <div class="iframe-wrap panel">
+            <iframe id="previewIframe" class="preview" src="about:blank" title="Chatbot Preview" allow="microphone; clipboard-read; clipboard-write"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Helpers
+        const qsGet = (searchParams, key, fallback='') => searchParams.get(key) || fallback;
+        const encode = (v) => encodeURIComponent(v || '');
+
+    // Element refs (all fields)
+        const iframe = document.getElementById('previewIframe');
+        const iframeUrlInput = document.getElementById('iframeUrl');
+        const botNameInput = document.getElementById('botName');
+        const botStatusInput = document.getElementById('botStatus');
+        const headerBgInput = document.getElementById('headerBg');
+    const headerBgColor = document.getElementById('headerBgColor');
+        const headerTextInput = document.getElementById('headerText');
+    const headerTextColor = document.getElementById('headerTextColor');
+        const botBubbleBgInput = document.getElementById('botBubbleBg');
+        const botBubbleTextInput = document.getElementById('botBubbleText');
+        const userBubbleBgInput = document.getElementById('userBubbleBg');
+    const userBubbleColor1 = document.getElementById('userBubbleColor1');
+    const userBubbleColor2 = document.getElementById('userBubbleColor2');
+    const userBubbleAngle = document.getElementById('userBubbleAngle');
+    const userBubbleUseGradient = document.getElementById('userBubbleUseGradient');
+        const userBubbleTextInput = document.getElementById('userBubbleText');
+        const bgFromInput = document.getElementById('bgFrom');
+    const bgFromColor = document.getElementById('bgFromColor');
+        const bgToInput = document.getElementById('bgTo');
+    const bgToColor = document.getElementById('bgToColor');
+        const chatBgInput = document.getElementById('chatBg');
+        const fontSizeInput = document.getElementById('fontSize');
+        const fontFamilyInput = document.getElementById('fontFamily');
+        const botAvatarInput = document.getElementById('botAvatar');
+        const userAvatarInput = document.getElementById('userAvatar');
+        const inputBgInput = document.getElementById('inputBg');
+        const inputBorderInput = document.getElementById('inputBorder');
+        const inputTextInput = document.getElementById('inputText');
+        const inputPlaceholderInput = document.getElementById('inputPlaceholder');
+        const buttonBgInput = document.getElementById('buttonBg');
+    const buttonColor1 = document.getElementById('buttonColor1');
+    const buttonColor2 = document.getElementById('buttonColor2');
+    const buttonAngle = document.getElementById('buttonAngle');
+    const buttonUseGradient = document.getElementById('buttonUseGradient');
+        const buttonTextInput = document.getElementById('buttonText');
+        const buttonShadowInput = document.getElementById('buttonShadow');
+        const buttonHoverInput = document.getElementById('buttonHover');
+        const borderRadiusInput = document.getElementById('borderRadius');
+        const shadowInput = document.getElementById('shadow');
+        const welcomeInput = document.getElementById('welcomeMessage');
+        const placeholderInput = document.getElementById('placeholder');
+        const encodedSrc = document.getElementById('encodedSrc');
+        const applyBtn = document.getElementById('applyBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Defaults matching the values you provided
+        const DEFAULTS = {
+            iframeBase: 'https://ai-chat-widget-production.up.railway.app/',
+            headerBg: '#0d47a1',
+            headerText: '#ffffff',
+            botName: 'Support Bot',
+            botStatus: 'Always online',
+            botBubbleBg: '#e3f2fd',
+            botBubbleText: '#0d47a1',
+            userBubbleBg: 'linear-gradient(135deg, #43a047, #1b5e20)',
+            userBubbleText: '#ffffff',
+            bgFrom: '#e3f2fd',
+            bgTo: '#ede7f6',
+            chatBg: 'linear-gradient(135deg, #e3f2fd, #ede7f6)',
+            fontSize: '16px',
+            fontFamily: "'Segoe UI', Roboto, sans-serif",
+            botAvatar: 'https://i.pravatar.cc/150?img=1',
+            userAvatar: 'https://i.pravatar.cc/150?img=2',
+            inputBg: '#ffffff',
+            inputBorder: '1px solid #64b5f6',
+            inputText: '#212121',
+            inputPlaceholder: '#9e9e9e',
+            buttonBg: 'linear-gradient(135deg, #43a047, #1b5e20)',
+            buttonText: '#ffffff',
+            buttonShadow: '0px 2px 6px rgba(76, 175, 80, 0.3)',
+            buttonHover: 'linear-gradient(135deg, #388e3c, #2e7d32)',
+            borderRadius: '12px',
+            shadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            welcomeMessage: "Hi! How can I help you today?",
+            placeholder: 'Type your message...'
+        };
+
+        // Parse initial params from iframe src if present, else use defaults
+        function parseInitial() {
+            try {
+                const src = iframe.getAttribute('src');
+                if (src && src !== 'about:blank') {
+                    const u = new URL(src);
+                    const sp = u.searchParams;
+                    return {
+                        iframeBase: u.origin + u.pathname,
+                        headerBg: qsGet(sp, 'headerBg', DEFAULTS.headerBg),
+                        headerText: qsGet(sp, 'headerText', DEFAULTS.headerText),
+                        botName: qsGet(sp, 'botName', DEFAULTS.botName),
+                        botStatus: qsGet(sp, 'botStatus', DEFAULTS.botStatus),
+                        botBubbleBg: qsGet(sp, 'botBubbleBg', DEFAULTS.botBubbleBg),
+                        botBubbleText: qsGet(sp, 'botBubbleText', DEFAULTS.botBubbleText),
+                        userBubbleBg: qsGet(sp, 'userBubbleBg', DEFAULTS.userBubbleBg),
+                        userBubbleText: qsGet(sp, 'userBubbleText', DEFAULTS.userBubbleText),
+                        bgFrom: qsGet(sp, 'bgFrom', DEFAULTS.bgFrom),
+                        bgTo: qsGet(sp, 'bgTo', DEFAULTS.bgTo),
+                        chatBg: qsGet(sp, 'chatBg', DEFAULTS.chatBg),
+                        fontSize: qsGet(sp, 'fontSize', DEFAULTS.fontSize),
+                        fontFamily: qsGet(sp, 'fontFamily', DEFAULTS.fontFamily),
+                        botAvatar: qsGet(sp, 'botAvatar', DEFAULTS.botAvatar),
+                        userAvatar: qsGet(sp, 'userAvatar', DEFAULTS.userAvatar),
+                        inputBg: qsGet(sp, 'inputBg', DEFAULTS.inputBg),
+                        inputBorder: qsGet(sp, 'inputBorder', DEFAULTS.inputBorder),
+                        inputText: qsGet(sp, 'inputText', DEFAULTS.inputText),
+                        inputPlaceholder: qsGet(sp, 'inputPlaceholder', DEFAULTS.inputPlaceholder),
+                        buttonBg: qsGet(sp, 'buttonBg', DEFAULTS.buttonBg),
+                        buttonText: qsGet(sp, 'buttonText', DEFAULTS.buttonText),
+                        buttonShadow: qsGet(sp, 'buttonShadow', DEFAULTS.buttonShadow),
+                        buttonHover: qsGet(sp, 'buttonHover', DEFAULTS.buttonHover),
+                        borderRadius: qsGet(sp, 'borderRadius', DEFAULTS.borderRadius),
+                        shadow: qsGet(sp, 'shadow', DEFAULTS.shadow),
+                        welcomeMessage: qsGet(sp, 'welcomeMessage', DEFAULTS.welcomeMessage),
+                        placeholder: qsGet(sp, 'placeholder', DEFAULTS.placeholder)
+                    };
+                }
+            } catch (e) {
+                // ignore and fall back to defaults
+            }
+            return DEFAULTS;
+        }
+
+        function buildSrc(values) {
+            const base = values.iframeBase || iframeUrlInput.value || DEFAULTS.iframeBase;
+            const url = new URL(base, window.location.origin);
+            const sp = url.searchParams;
+            // write all customization params
+            sp.set('headerBg', values.headerBg || '');
+            sp.set('headerText', values.headerText || '');
+            sp.set('botName', values.botName || '');
+            sp.set('botStatus', values.botStatus || '');
+            sp.set('botBubbleBg', values.botBubbleBg || '');
+            sp.set('botBubbleText', values.botBubbleText || '');
+            sp.set('userBubbleBg', values.userBubbleBg || '');
+            sp.set('userBubbleText', values.userBubbleText || '');
+            sp.set('bgFrom', values.bgFrom || '');
+            sp.set('bgTo', values.bgTo || '');
+            sp.set('chatBg', values.chatBg || '');
+            sp.set('fontSize', values.fontSize || '');
+            sp.set('fontFamily', values.fontFamily || '');
+            sp.set('botAvatar', values.botAvatar || '');
+            sp.set('userAvatar', values.userAvatar || '');
+            sp.set('inputBg', values.inputBg || '');
+            sp.set('inputBorder', values.inputBorder || '');
+            sp.set('inputText', values.inputText || '');
+            sp.set('inputPlaceholder', values.inputPlaceholder || '');
+            sp.set('buttonBg', values.buttonBg || '');
+            sp.set('buttonText', values.buttonText || '');
+            sp.set('buttonShadow', values.buttonShadow || '');
+            sp.set('buttonHover', values.buttonHover || '');
+            sp.set('borderRadius', values.borderRadius || '');
+            sp.set('shadow', values.shadow || '');
+            sp.set('welcomeMessage', values.welcomeMessage || '');
+            sp.set('placeholder', values.placeholder || '');
+            return url.toString();
+        }
+
+        function updateIframe(values) {
+            const src = buildSrc(values);
+            iframe.src = src;
+            encodedSrc.value = src;
+        }
+
+        // Debounce helper
+        function debounce(fn, wait) {
+            let t;
+            return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+        }
+
+        // Read values from the form
+        function readValues() {
+            return {
+                iframeBase: iframeUrlInput.value || DEFAULTS.iframeBase,
+                headerBg: (headerBgColor && headerBgColor.value) || headerBgInput.value || DEFAULTS.headerBg,
+                headerText: (headerTextColor && headerTextColor.value) || headerTextInput.value || DEFAULTS.headerText,
+                botName: botNameInput.value || DEFAULTS.botName,
+                botStatus: botStatusInput.value || DEFAULTS.botStatus,
+                botBubbleBg: botBubbleBgInput.value || DEFAULTS.botBubbleBg,
+                botBubbleText: botBubbleTextInput.value || DEFAULTS.botBubbleText,
+                userBubbleBg: (userBubbleUseGradient && userBubbleUseGradient.checked) ? `linear-gradient(${userBubbleAngle.value}deg, ${userBubbleColor1.value}, ${userBubbleColor2.value})` : (userBubbleBgInput.value || DEFAULTS.userBubbleBg),
+                userBubbleText: userBubbleTextInput.value || DEFAULTS.userBubbleText,
+                bgFrom: (bgFromColor && bgFromColor.value) || bgFromInput.value || DEFAULTS.bgFrom,
+                bgTo: (bgToColor && bgToColor.value) || bgToInput.value || DEFAULTS.bgTo,
+                chatBg: chatBgInput.value || DEFAULTS.chatBg,
+                fontSize: fontSizeInput.value || DEFAULTS.fontSize,
+                fontFamily: fontFamilyInput.value || DEFAULTS.fontFamily,
+                botAvatar: botAvatarInput.value || DEFAULTS.botAvatar,
+                userAvatar: userAvatarInput.value || DEFAULTS.userAvatar,
+                inputBg: inputBgInput.value || DEFAULTS.inputBg,
+                inputBorder: inputBorderInput.value || DEFAULTS.inputBorder,
+                inputText: inputTextInput.value || DEFAULTS.inputText,
+                inputPlaceholder: inputPlaceholderInput.value || DEFAULTS.inputPlaceholder,
+                buttonBg: (buttonUseGradient && buttonUseGradient.checked) ? `linear-gradient(${buttonAngle.value}deg, ${buttonColor1.value}, ${buttonColor2.value})` : (buttonBgInput.value || DEFAULTS.buttonBg),
+                buttonText: buttonTextInput.value || DEFAULTS.buttonText,
+                buttonShadow: buttonShadowInput.value || DEFAULTS.buttonShadow,
+                buttonHover: buttonHoverInput.value || DEFAULTS.buttonHover,
+                borderRadius: borderRadiusInput.value || DEFAULTS.borderRadius,
+                shadow: shadowInput.value || DEFAULTS.shadow,
+                welcomeMessage: welcomeInput.value || DEFAULTS.welcomeMessage,
+                placeholder: placeholderInput.value || DEFAULTS.placeholder
+            };
+        }
+
+        // Initialize form with parsed or default values
+        (function init() {
+            const initial = parseInitial();
+            iframeUrlInput.value = initial.iframeBase || DEFAULTS.iframeBase;
+            headerBgInput.value = initial.headerBg || DEFAULTS.headerBg;
+            headerTextInput.value = initial.headerText || DEFAULTS.headerText;
+            botNameInput.value = initial.botName || DEFAULTS.botName;
+            botStatusInput.value = initial.botStatus || DEFAULTS.botStatus;
+            botBubbleBgInput.value = initial.botBubbleBg || DEFAULTS.botBubbleBg;
+            botBubbleTextInput.value = initial.botBubbleText || DEFAULTS.botBubbleText;
+            userBubbleBgInput.value = initial.userBubbleBg || DEFAULTS.userBubbleBg;
+            userBubbleTextInput.value = initial.userBubbleText || DEFAULTS.userBubbleText;
+            bgFromInput.value = initial.bgFrom || DEFAULTS.bgFrom;
+            bgToInput.value = initial.bgTo || DEFAULTS.bgTo;
+            chatBgInput.value = initial.chatBg || DEFAULTS.chatBg;
+            fontSizeInput.value = initial.fontSize || DEFAULTS.fontSize;
+            fontFamilyInput.value = initial.fontFamily || DEFAULTS.fontFamily;
+            botAvatarInput.value = initial.botAvatar || DEFAULTS.botAvatar;
+            userAvatarInput.value = initial.userAvatar || DEFAULTS.userAvatar;
+            inputBgInput.value = initial.inputBg || DEFAULTS.inputBg;
+            inputBorderInput.value = initial.inputBorder || DEFAULTS.inputBorder;
+            inputTextInput.value = initial.inputText || DEFAULTS.inputText;
+            inputPlaceholderInput.value = initial.inputPlaceholder || DEFAULTS.inputPlaceholder;
+            buttonBgInput.value = initial.buttonBg || DEFAULTS.buttonBg;
+            buttonTextInput.value = initial.buttonText || DEFAULTS.buttonText;
+            buttonShadowInput.value = initial.buttonShadow || DEFAULTS.buttonShadow;
+            buttonHoverInput.value = initial.buttonHover || DEFAULTS.buttonHover;
+            borderRadiusInput.value = initial.borderRadius || DEFAULTS.borderRadius;
+            shadowInput.value = initial.shadow || DEFAULTS.shadow;
+            welcomeInput.value = initial.welcomeMessage || DEFAULTS.welcomeMessage;
+            placeholderInput.value = initial.placeholder || DEFAULTS.placeholder;
+
+            updateIframe(readValues());
+        })();
+
+        // Live updates (debounced)
+        const liveUpdate = debounce(() => updateIframe(readValues()), 220);
+
+        // wire input events for all inputs
+        const allInputs = [iframeUrlInput, headerBgInput, headerTextInput, botNameInput, botStatusInput, botBubbleBgInput, botBubbleTextInput, userBubbleBgInput, userBubbleTextInput, bgFromInput, bgToInput, chatBgInput, fontSizeInput, fontFamilyInput, botAvatarInput, userAvatarInput, inputBgInput, inputBorderInput, inputTextInput, inputPlaceholderInput, buttonBgInput, buttonTextInput, buttonShadowInput, buttonHoverInput, borderRadiusInput, shadowInput, welcomeInput, placeholderInput];
+        allInputs.forEach(i => i && i.addEventListener && i.addEventListener('input', liveUpdate));
+
+        // Wire color pickers, angle inputs and gradient toggles so they update their text input
+        const syncAndUpdate = () => {
+            // header
+            if (headerBgColor) headerBgInput.value = headerBgColor.value;
+            if (headerTextColor) headerTextInput.value = headerTextColor.value;
+
+            // bgFrom/bgTo
+            if (bgFromColor) bgFromInput.value = bgFromColor.value;
+            if (bgToColor) bgToInput.value = bgToColor.value;
+
+            // user bubble gradient or single color
+            if (userBubbleUseGradient && userBubbleUseGradient.checked) {
+                userBubbleBgInput.value = `linear-gradient(${userBubbleAngle.value}deg, ${userBubbleColor1.value}, ${userBubbleColor2.value})`;
+            } else if (userBubbleColor1) {
+                userBubbleBgInput.value = userBubbleColor1.value;
+            }
+
+            // button gradient or single color
+            if (buttonUseGradient && buttonUseGradient.checked) {
+                buttonBgInput.value = `linear-gradient(${buttonAngle.value}deg, ${buttonColor1.value}, ${buttonColor2.value})`;
+            } else if (buttonColor1) {
+                buttonBgInput.value = buttonColor1.value;
+            }
+
+            // Trigger live update
+            liveUpdate();
+        };
+
+        // Add listeners to color/angle/checkbox controls
+        const extraControls = [headerBgColor, headerTextColor, userBubbleColor1, userBubbleColor2, userBubbleAngle, userBubbleUseGradient, bgFromColor, bgToColor, buttonColor1, buttonColor2, buttonAngle, buttonUseGradient];
+        extraControls.forEach(c => {
+            if (!c || !c.addEventListener) return;
+            c.addEventListener('input', syncAndUpdate);
+            c.addEventListener('change', syncAndUpdate);
+        });
+
+        applyBtn.addEventListener('click', () => updateIframe(readValues()));
+
+        resetBtn.addEventListener('click', () => {
+            // reset values
+            iframeUrlInput.value = DEFAULTS.iframeBase;
+            headerBgInput.value = DEFAULTS.headerBg;
+            headerTextInput.value = DEFAULTS.headerText;
+            botNameInput.value = DEFAULTS.botName;
+            botStatusInput.value = DEFAULTS.botStatus;
+            botBubbleBgInput.value = DEFAULTS.botBubbleBg;
+            botBubbleTextInput.value = DEFAULTS.botBubbleText;
+            userBubbleBgInput.value = DEFAULTS.userBubbleBg;
+            userBubbleTextInput.value = DEFAULTS.userBubbleText;
+            bgFromInput.value = DEFAULTS.bgFrom;
+            bgToInput.value = DEFAULTS.bgTo;
+            chatBgInput.value = DEFAULTS.chatBg;
+            fontSizeInput.value = DEFAULTS.fontSize;
+            fontFamilyInput.value = DEFAULTS.fontFamily;
+            botAvatarInput.value = DEFAULTS.botAvatar;
+            userAvatarInput.value = DEFAULTS.userAvatar;
+            inputBgInput.value = DEFAULTS.inputBg;
+            inputBorderInput.value = DEFAULTS.inputBorder;
+            inputTextInput.value = DEFAULTS.inputText;
+            inputPlaceholderInput.value = DEFAULTS.inputPlaceholder;
+            buttonBgInput.value = DEFAULTS.buttonBg;
+            buttonTextInput.value = DEFAULTS.buttonText;
+            buttonShadowInput.value = DEFAULTS.buttonShadow;
+            buttonHoverInput.value = DEFAULTS.buttonHover;
+            borderRadiusInput.value = DEFAULTS.borderRadius;
+            shadowInput.value = DEFAULTS.shadow;
+            welcomeInput.value = DEFAULTS.welcomeMessage;
+            placeholderInput.value = DEFAULTS.placeholder;
+            updateIframe(readValues());
+        });
+
+        // Make encodedSrc selectable
+        encodedSrc.addEventListener('click', () => encodedSrc.select());
+    </script>
+</body>
+</html>

@@ -5,6 +5,7 @@ export { Register } from './Register';
 export { Onboarding } from './Onboarding';
 export { Preview } from './Preview';
 export { Pricing } from './Pricing';
+export { default as Widget } from './Widget';
 
 // Home section pages
 export { 

@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { showLoginSuccess, showLoginError } from '@/ui/utils/toast'
 
 
 export function Login() {
@@ -37,12 +38,18 @@ export function Login() {
       if (response.ok) {
         const data = await response.json()
         localStorage.setItem('token', data.token)
+        showLoginSuccess(data.user?.name)
         navigate('/genie')
       } else {
-        setAuthError('Login failed')
+        const errorData = await response.json()
+        const errorMessage = errorData.message || 'Login failed'
+        setAuthError(errorMessage)
+        showLoginError(errorMessage)
       }
     } catch (err) {
-      setAuthError('Network error')
+      const errorMessage = 'Network error - please check your connection'
+      setAuthError(errorMessage)
+      showLoginError(errorMessage)
     } finally {
       setIsAuthenticating(false)
     }

@@ -19,10 +19,12 @@ import {
   TrainGenie,
   GenieScripts,
   GenieSettings,
-  ChatLogs
+  ChatLogs,
+  Widget
 } from '@/pages';
 import { HomeSidebarLayout } from '@/ui/layouts/HomeSidebarLayout';
 import { GenieSidebarLayout } from '@/ui/layouts/GenieSidebarLayout';
+import { Toaster } from '@/ui/components/ui/sonner';
 
 function App() {
   return (
@@ -39,6 +41,9 @@ function App() {
         
         {/* Preview page without layout */}
         <Route path="/preview/:url" element={<Preview />} />
+        
+        {/* Widget page without layout */}
+        <Route path="/widget" element={<Widget />} />
         
         {/* Pricing page without layout */}
         <Route path="/pricing" element={<Pricing />} />
@@ -81,6 +86,7 @@ function App() {
         {/* Default redirect to home */}
         <Route path="/" element={<HomeSidebarLayout><Dashboard /></HomeSidebarLayout>} />
       </Routes>
+      <Toaster />
     </Router>
   );
 }

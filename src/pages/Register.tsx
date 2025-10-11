@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User } from 'lucide-react'
+import { showRegisterSuccess, showRegisterError } from '@/ui/utils/toast'
 
 export function Register() {
   const navigate = useNavigate()
@@ -41,12 +41,17 @@ export function Register() {
         if (data.data.user) {
           localStorage.setItem('user', JSON.stringify(data.data.user))
         }
+        showRegisterSuccess(data.data.user?.name || name)
         navigate('/genie')
       } else {
-        setError(data.error || 'Registration failed')
+        const errorMessage = data.error || 'Registration failed'
+        setError(errorMessage)
+        showRegisterError(errorMessage)
       }
     } catch (err) {
-      setError('Network error')
+      const errorMessage = 'Network error - please check your connection'
+      setError(errorMessage)
+      showRegisterError(errorMessage)
     } finally {
       setIsLoading(false)
     }

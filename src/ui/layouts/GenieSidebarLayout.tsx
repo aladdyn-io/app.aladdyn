@@ -11,15 +11,17 @@ import {
   ChatBubbleLeftRightIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
+import { Avatar, AvatarFallback } from '@/ui/components/ui/avatar';
 
 interface GenieSidebarLayoutProps {
   children: ReactNode;
   className?: string;
 }
 
-const genieNavigation = [
+
+const navigation = [
   { name: 'Dashboard', href: '/genie', icon: ChartBarIcon },
-  { name: 'Analytics (Umami)', href: '/genie/analytics', icon: ChartBarIcon },
+  { name: 'Analytics', href: '/genie/analytics', icon: ChartBarIcon },
   { name: 'Playground', href: '/genie/playground', icon: PlayIcon },
   { name: 'Lead Track', href: '/genie/leads', icon: UserGroupIcon },
   { name: 'Chat Logs', href: '/genie/chatlogs', icon: ChatBubbleLeftRightIcon },
@@ -28,12 +30,15 @@ const genieNavigation = [
   { name: 'Settings', href: '/genie/settings', icon: Cog6ToothIcon },
 ];
 
-const leadTrackSubNavigation = [
+const leadSubNavigation = [
   { name: 'All', href: '/genie/leads' },
   { name: 'Mail', href: '/genie/leads/mail' },
   { name: 'WhatsApp', href: '/genie/leads/whatsapp' },
   { name: 'Instagram', href: '/genie/leads/instagram' },
 ];
+
+
+
 
 function UsageComponent() {
   return (
@@ -93,6 +98,8 @@ function UsageComponent() {
   );
 }
 
+
+
 function GenieSidebar() {
   const location = useLocation();
 
@@ -104,25 +111,26 @@ function GenieSidebar() {
   };
 
   return (
-    <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
+    <div className="fixed inset-y-0 z-50 flex w-64 flex-col">
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-white to-emerald-50 px-6 shadow-xl border-r border-emerald-100">
+        {/* Header */}
         <div className="flex h-16 shrink-0 items-center border-b border-emerald-100">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-800 rounded-xl flex items-center justify-center shadow-lg ring-2 ring-emerald-200 ring-opacity-50">
-                <img src="/gene.png" alt="Aladdyn" className="w-12 h-12 object-contain drop-shadow-sm" />
-            </div>
-            <div>
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 bg-clip-text text-transparent">Genie</span>
-              <div className="text-xs text-emerald-600 font-medium">AI Workspace</div>
-            </div>
-          </div>
+          <Link to="/genie" className="flex items-center gap-3 px-3 py-3" aria-label="Genie home">
+            <Avatar size="md" className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-800">
+              <AvatarFallback className="text-white font-semibold">G</AvatarFallback>
+            </Avatar>
+            <span className="text-base font-semibold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">
+              Genie
+            </span>
+          </Link>
         </div>
         
+        {/* Navigation */}
         <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
               <ul role="list" className="-mx-2 space-y-1">
-                {genieNavigation.map((item) => (
+                {navigation.map((item) => (
                   <li key={item.name}>
                     {item.name === 'Lead Track' ? (
                       <div>
@@ -142,13 +150,12 @@ function GenieSidebar() {
                                 : 'text-gray-400 group-hover:text-emerald-700',
                               'h-6 w-6 shrink-0'
                             )}
-                            aria-hidden="true"
                           />
                           {item.name}
                         </Link>
                         {isCurrentPath('/genie/leads') && (
                           <ul className="ml-6 mt-2 space-y-1">
-                            {leadTrackSubNavigation.map((subItem) => (
+                            {leadSubNavigation.map((subItem) => (
                               <li key={subItem.name}>
                                 <Link
                                   to={subItem.href}
@@ -183,7 +190,6 @@ function GenieSidebar() {
                               : 'text-gray-400 group-hover:text-emerald-700',
                             'h-6 w-6 shrink-0'
                           )}
-                          aria-hidden="true"
                         />
                         {item.name}
                       </Link>
@@ -202,9 +208,9 @@ function GenieSidebar() {
   );
 }
 
-export function GenieSidebarLayout({ children, className = '' }: GenieSidebarLayoutProps) {
+export function GenieSidebarLayout({ children, className }: GenieSidebarLayoutProps) {
   return (
-    <div className={`min-h-screen bg-gray-50 ${className}`}>
+    <div className={cn('min-h-screen bg-gray-50', className)}>
       {/* Navbar */}
       <Navbar />
       
@@ -213,7 +219,7 @@ export function GenieSidebarLayout({ children, className = '' }: GenieSidebarLay
         <GenieSidebar />
         
         {/* Main content */}
-        <div className="lg:pl-64 flex-1">
+        <div className="pl-64 flex-1">
           {/* Page content */}
           <main className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

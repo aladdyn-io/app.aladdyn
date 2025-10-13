@@ -1,3 +1,4 @@
+import { Outlet } from "react-router-dom"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import {
@@ -5,11 +6,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 
-interface HomeLayoutProps {
-  children: React.ReactNode
-}
-
-export function HomeLayout({ children }: HomeLayoutProps) {
+export function HomeLayout() {
   return (
     <SidebarProvider
       style={
@@ -25,7 +22,7 @@ export function HomeLayout({ children }: HomeLayoutProps) {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              {children}
+              <Outlet />
             </div>
           </div>
         </div>

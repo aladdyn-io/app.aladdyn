@@ -25,6 +25,22 @@ export function Login() {
     setAuthError(null)
     setIsAuthenticating(true)
 
+    // Simple test login - remove this and use API call in production
+    if (email && password) {
+      localStorage.setItem('token', 'test-token-' + Date.now())
+      localStorage.setItem('user', JSON.stringify({
+        name: email.split('@')[0],
+        email: email,
+        avatar: '/avatars/user.jpg'
+      }))
+      showLoginSuccess(email.split('@')[0])
+      setTimeout(() => {
+        navigate('/')
+      }, 100)
+      setIsAuthenticating(false)
+      return
+    }
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
@@ -39,7 +55,7 @@ export function Login() {
         const data = await response.json()
         localStorage.setItem('token', data.token)
         showLoginSuccess(data.user?.name)
-        navigate('/genie')
+        navigate('/')
       } else {
         const errorData = await response.json()
         const errorMessage = errorData.message || 'Login failed'
@@ -92,14 +108,12 @@ export function Login() {
 
         {/* Login Form Card */}
         <Card className="bg-white/80 backdrop-blur-lg border-slate-200 shadow-2xl animate-fade-in" style={{animationDelay: '0.4s'}}>
-          <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl font-bold text-slate-900">Sign in to Aladdyn</CardTitle>
-            <CardDescription className="text-slate-600">
-              Sign in or create your account in a single step—just enter your email and password to access your AI workspace.
-            </CardDescription>
+          <CardHeader className="space-y-1 pb-2">
+            <CardTitle className="text-2xl font-bold text-slate-900">Sign in</CardTitle>
+
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-semibold text-slate-700">
                   Email address
@@ -223,14 +237,14 @@ export function Login() {
               </div>
             </div>
 
-            {/* <div className="mt-8 text-center">
+            <div className="mt-8 text-center">
               <p className="text-sm text-slate-600">
                 Don't have an account?{' '}
-                <Link to="/" className="font-medium text-emerald-600 hover:text-emerald-500 transition-colors">
-                  Start your free trial
+                <Link to="/register" className="font-medium text-emerald-600 hover:text-emerald-500 transition-colors">
+                  Create account
                 </Link>
               </p>
-            </div> */}
+            </div>
           </CardContent>
         </Card>
 

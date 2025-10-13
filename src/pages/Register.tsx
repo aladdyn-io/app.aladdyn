@@ -22,6 +22,22 @@ export function Register() {
     setError(null)
     setIsLoading(true)
 
+    // Simple test registration - remove this and use API call in production
+    if (name && email && password) {
+      localStorage.setItem('token', 'test-token-' + Date.now())
+      localStorage.setItem('user', JSON.stringify({
+        name: name,
+        email: email,
+        avatar: '/avatars/user.jpg'
+      }))
+      showRegisterSuccess(name)
+      setTimeout(() => {
+        navigate('/')
+      }, 100)
+      setIsLoading(false)
+      return
+    }
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
@@ -42,7 +58,7 @@ export function Register() {
           localStorage.setItem('user', JSON.stringify(data.data.user))
         }
         showRegisterSuccess(data.data.user?.name || name)
-        navigate('/genie')
+        navigate('/')
       } else {
         const errorMessage = data.error || 'Registration failed'
         setError(errorMessage)
@@ -84,14 +100,12 @@ export function Register() {
         </div>
 
         <Card className="bg-white/80 backdrop-blur-lg border-slate-200 shadow-2xl animate-fade-in" style={{animationDelay: '0.4s'}}>
-          <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl font-bold text-slate-900">Create your Aladdyn account</CardTitle>
-            <CardDescription className="text-slate-600">
-              Join Aladdyn and start building with AI-powered tools. Enter your details to create your account and access your AI workspace.
-            </CardDescription>
+          <CardHeader className="space-y-1 pb-2">
+            <CardTitle className="text-2xl font-bold text-slate-900">Create your account</CardTitle>
+
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-semibold text-slate-700">
                   Full name

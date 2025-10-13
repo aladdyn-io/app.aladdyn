@@ -20,6 +20,14 @@ const routeNames: Record<string, string> = {
   '/profile': 'Profile',
   '/settings': 'Settings',
   '/about': 'About',
+  '/genie': 'Dashboard',
+  '/genie/analytics': 'Analytics',
+  '/genie/playground': 'Playground',
+  '/genie/leads': 'Leads',
+  '/genie/chatlogs': 'Chat Logs',
+  '/genie/train': 'Train',
+  '/genie/scripts': 'Scripts',
+  '/genie/settings': 'Settings',
 }
 
 
@@ -47,6 +55,16 @@ export function SiteHeader() {
   const currentPageName = routeNames[currentPath] || 'Dashboard'
   const [isHovered, setIsHovered] = useState(false)
   const [hoveredProject, setHoveredProject] = useState<string | null>(null)
+  const [selectedGenie, setSelectedGenie] = useState<string | null>(null)
+  
+  // Get genie name from URL or localStorage
+  const getGenieName = () => {
+    if (currentPath.startsWith('/genie')) {
+      const storedGenie = localStorage.getItem('selectedGenie')
+      return storedGenie || null
+    }
+    return null
+  }
 
   return (
     <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
@@ -87,7 +105,12 @@ export function SiteHeader() {
                           <div className="absolute left-full top-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                             <div className="py-1">
                               {projectGenies.vijay.map((genie) => (
-                                <a key={genie.id} href={genie.url} className="px-3 py-2 text-sm hover:bg-gray-100 transition-colors block">
+                                <a 
+                                  key={genie.id} 
+                                  href={genie.url} 
+                                  className="px-3 py-2 text-sm hover:bg-gray-100 transition-colors block"
+                                  onClick={() => localStorage.setItem('selectedGenie', genie.name)}
+                                >
                                   {genie.name}
                                 </a>
                               ))}
@@ -109,7 +132,12 @@ export function SiteHeader() {
                           <div className="absolute left-full top-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                             <div className="py-1">
                               {projectGenies.marketing.map((genie) => (
-                                <a key={genie.id} href={genie.url} className="px-3 py-2 text-sm hover:bg-gray-100 transition-colors block">
+                                <a 
+                                  key={genie.id} 
+                                  href={genie.url} 
+                                  className="px-3 py-2 text-sm hover:bg-gray-100 transition-colors block"
+                                  onClick={() => localStorage.setItem('selectedGenie', genie.name)}
+                                >
                                   {genie.name}
                                 </a>
                               ))}
@@ -131,7 +159,12 @@ export function SiteHeader() {
                           <div className="absolute left-full top-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                             <div className="py-1">
                               {projectGenies.support.map((genie) => (
-                                <a key={genie.id} href={genie.url} className="px-3 py-2 text-sm hover:bg-gray-100 transition-colors block">
+                                <a 
+                                  key={genie.id} 
+                                  href={genie.url} 
+                                  className="px-3 py-2 text-sm hover:bg-gray-100 transition-colors block"
+                                  onClick={() => localStorage.setItem('selectedGenie', genie.name)}
+                                >
                                   {genie.name}
                                 </a>
                               ))}
@@ -144,7 +177,23 @@ export function SiteHeader() {
                 )}
               </div>
             </BreadcrumbItem>
-            {currentPath !== '/' && (
+            {getGenieName() && currentPath.startsWith('/genie') && (
+              <>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{getGenieName()}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            )}
+            {currentPath !== '/' && !currentPath.startsWith('/genie') && (
+              <>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{currentPageName}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            )}
+            {currentPath.startsWith('/genie') && currentPath !== '/genie' && (
               <>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>

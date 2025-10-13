@@ -23,47 +23,45 @@ import {
   Widget,
   DashboardV2,
   HomeLayout,
-  GenieLayout
+  GenieLayout,
+  CreateGenie
 } from '@/pages';
 import { Toaster } from '@/components/ui/sonner';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { PublicRoute } from '@/components/PublicRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Login page without layout */}
-        <Route path="/login" element={<Login />} />
+        {/* Public pages - redirect to home if already logged in */}
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         
-        {/* Register page without layout */}
-        <Route path="/register" element={<Register />} />
+        {/* Onboarding pages without layout */}
+        <Route path="/create-genie" element={<ProtectedRoute><CreateGenie /></ProtectedRoute>} />
+        <Route path="/create" element={<Onboarding />} />
+        <Route path="/create/:genieId" element={<Onboarding />} />
         
-        {/* Onboarding page without layout */}
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/onboarding/:genieId" element={<Onboarding />} />
-        
-        {/* Preview page without layout */}
-        <Route path="/preview/:url" element={<Preview />} />
-        
-        {/* Widget page without layout */}
-        <Route path="/widget" element={<Widget />} />
-        
-        {/* Pricing page without layout */}
+        {/* Protected pages without layout */}
+        <Route path="/preview/:url" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+        <Route path="/widget" element={<ProtectedRoute><Widget /></ProtectedRoute>} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/dashboard-v2" element={<ProtectedRoute><DashboardV2 /></ProtectedRoute>} />
         
-        {/* Dashboard V2 page without layout */}
-        <Route path="/dashboard-v2" element={<DashboardV2 />} />
+        {/* Protected Home pages */}
+        <Route path="/" element={<ProtectedRoute><HomeLayout /></ProtectedRoute>}>
+          <Route index element={<Dashboard />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="documents" element={<Documents />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="about" element={<About />} />
+        </Route>
         
-        {/* Home pages with HomeLayout wrapper */}
-        <Route path="/" element={<HomeLayout><Dashboard /></HomeLayout>} />
-        <Route path="/analytics" element={<HomeLayout><Analytics /></HomeLayout>} />
-        <Route path="/documents" element={<HomeLayout><Documents /></HomeLayout>} />
-        <Route path="/notifications" element={<HomeLayout><Notifications /></HomeLayout>} />
-        <Route path="/profile" element={<HomeLayout><Profile /></HomeLayout>} />
-        <Route path="/settings" element={<HomeLayout><Settings /></HomeLayout>} />
-        <Route path="/about" element={<HomeLayout><About /></HomeLayout>} />
-        
-        {/* Genie pages with GenieLayout wrapper */}
-        <Route path="/genie" element={<GenieLayout />}>
+        {/* Protected Genie pages */}
+        <Route path="/genie" element={<ProtectedRoute><GenieLayout /></ProtectedRoute>}>
           <Route index element={<GenieDashboard />} />
           <Route path=":genieId" element={<GenieDashboard />} />
           <Route path="analytics" element={<GenieAnalytics />} />

@@ -32,3 +32,6 @@ export {
   GenieScripts,
   GenieSettings 
 } from './genie';
+
+// Create Genie
+export { CreateGenie } from './CreateGenie';

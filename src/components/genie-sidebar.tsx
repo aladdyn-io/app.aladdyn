@@ -7,7 +7,6 @@ import {
   DatabaseIcon,
   FileCodeIcon,
   FileIcon,
-  FileTextIcon,
   FolderIcon,
   HelpCircleIcon,
   LayoutDashboardIcon,
@@ -40,74 +39,51 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/",
+      url: "/genie",
       icon: LayoutDashboardIcon,
     },
     {
-      title: "Lifecycle",
-      url: "/notifications",
-      icon: ListIcon,
-    },
-    {
       title: "Analytics",
-      url: "/analytics",
+      url: "/genie/analytics",
       icon: BarChartIcon,
     },
     {
-      title: "Projects",
-      url: "/about",
+      title: "Playground",
+      url: "/genie/playground",
       icon: FolderIcon,
     },
     {
-      title: "Team",
-      url: "/profile",
+      title: "Leads",
+      url: "/genie/leads",
       icon: UsersIcon,
+    },
+    {
+      title: "Chat Logs",
+      url: "/genie/chatlogs",
+      icon: ListIcon,
     },
   ],
   navClouds: [
     {
-      title: "Capture",
+      title: "Train",
       icon: CameraIcon,
       isActive: true,
-      url: "#",
+      url: "/genie/train",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
+          title: "Training Data",
+          url: "/genie/train",
         },
       ],
     },
     {
-      title: "Proposal",
-      icon: FileTextIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
+      title: "Scripts",
       icon: FileCodeIcon,
-      url: "#",
+      url: "/genie/scripts",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
+          title: "Active Scripts",
+          url: "/genie/scripts",
         },
       ],
     },
@@ -115,7 +91,7 @@ const data = {
   navSecondary: [
     {
       title: "Settings",
-      url: "/settings",
+      url: "/genie/settings",
       icon: SettingsIcon,
     },
     {
@@ -125,30 +101,30 @@ const data = {
     },
     {
       title: "Search",
-      url: "/",
+      url: "/genie",
       icon: SearchIcon,
     },
   ],
   documents: [
     {
       name: "Data Library",
-      url: "/documents",
+      url: "/genie/train",
       icon: DatabaseIcon,
     },
     {
       name: "Reports",
-      url: "/analytics",
+      url: "/genie/analytics",
       icon: ClipboardListIcon,
     },
     {
-      name: "Word Assistant",
-      url: "/documents",
+      name: "Scripts",
+      url: "/genie/scripts",
       icon: FileIcon,
     },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function GenieSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -158,9 +134,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="/">
+              <a href="/genie">
                 <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">aladdyn</span>
+                <span className="text-base font-semibold">genie</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

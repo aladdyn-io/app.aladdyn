@@ -20,9 +20,9 @@ export function Analytics() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="px-4 lg:px-6">
       {/* Page header */}
-      <div>
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
         <p className="mt-1 text-sm text-gray-500">
           Track your application performance and user engagement metrics.
@@ -30,7 +30,7 @@ export function Analytics() {
       </div>
 
       {/* Key metrics */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-6">
         {analyticsData.map((item) => (
           <Card key={item.metric}>
             <CardContent className="p-6">
@@ -49,7 +49,7 @@ export function Analytics() {
       </div>
 
       {/* Charts section */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
         <Card>
           <CardHeader>
             <CardTitle>Traffic Overview</CardTitle>

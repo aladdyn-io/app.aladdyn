@@ -21,10 +21,10 @@ import {
   GenieSettings,
   ChatLogs,
   Widget,
-  DashboardV2
+  DashboardV2,
+  HomeLayout,
+  GenieLayout
 } from '@/pages';
-import { HomeSidebarLayout } from '@/ui/layouts/HomeSidebarLayout';
-import { GenieSidebarLayout } from '@/ui/layouts/GenieSidebarLayout';
 import { Toaster } from '@/components/ui/sonner';
 
 function App() {
@@ -53,43 +53,32 @@ function App() {
         {/* Dashboard V2 page without layout */}
         <Route path="/dashboard-v2" element={<DashboardV2 />} />
         
-        {/* Home section with HomeSidebarLayout */}
-        <Route path="/home/*" element={
-          <HomeSidebarLayout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/documents" element={<Documents />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/about" element={<About />} />
-            </Routes>
-          </HomeSidebarLayout>
-        } />
+        {/* Home pages with HomeLayout wrapper */}
+        <Route path="/" element={<HomeLayout><Dashboard /></HomeLayout>} />
+        <Route path="/analytics" element={<HomeLayout><Analytics /></HomeLayout>} />
+        <Route path="/documents" element={<HomeLayout><Documents /></HomeLayout>} />
+        <Route path="/notifications" element={<HomeLayout><Notifications /></HomeLayout>} />
+        <Route path="/profile" element={<HomeLayout><Profile /></HomeLayout>} />
+        <Route path="/settings" element={<HomeLayout><Settings /></HomeLayout>} />
+        <Route path="/about" element={<HomeLayout><About /></HomeLayout>} />
         
-        {/* Genie section with GenieSidebarLayout */}
-        <Route path="/genie/*" element={
-          <GenieSidebarLayout >
-            <Routes>
-              <Route path="/" element={<GenieDashboard />} />
-              <Route path="/:genieId" element={<GenieDashboard />} />
-              <Route path="/analytics" element={<GenieAnalytics />} />
-              <Route path="/playground" element={<GeniePlayground />} />
-              <Route path="/leads" element={<LeadTrack />} />
-              <Route path="/leads/mail" element={<LeadTrack />} />
-              <Route path="/leads/whatsapp" element={<LeadTrack />} />
-              <Route path="/leads/instagram" element={<LeadTrack />} />
-              <Route path="/chatlogs" element={<ChatLogs />} />
-              <Route path="/train" element={<TrainGenie />} />
-              <Route path="/scripts" element={<GenieScripts />} />
-              <Route path="/settings" element={<GenieSettings />} />
-            </Routes>
-          </GenieSidebarLayout>
-        } />
+        {/* Genie pages with GenieLayout wrapper */}
+        <Route path="/genie" element={<GenieLayout />}>
+          <Route index element={<GenieDashboard />} />
+          <Route path=":genieId" element={<GenieDashboard />} />
+          <Route path="analytics" element={<GenieAnalytics />} />
+          <Route path="playground" element={<GeniePlayground />} />
+          <Route path="leads" element={<LeadTrack />} />
+          <Route path="leads/mail" element={<LeadTrack />} />
+          <Route path="leads/whatsapp" element={<LeadTrack />} />
+          <Route path="leads/instagram" element={<LeadTrack />} />
+          <Route path="chatlogs" element={<ChatLogs />} />
+          <Route path="train" element={<TrainGenie />} />
+          <Route path="scripts" element={<GenieScripts />} />
+          <Route path="settings" element={<GenieSettings />} />
+        </Route>
         
         {/* Default redirect to home */}
-        <Route path="/" element={<HomeSidebarLayout><Dashboard /></HomeSidebarLayout>} />
       </Routes>
       <Toaster />
     </Router>

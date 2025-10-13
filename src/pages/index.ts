@@ -10,6 +10,7 @@ export { default as DashboardV2 } from './DashboardV2';
 
 // Home section pages
 export { 
+  HomeLayout,
   Dashboard, 
   Analytics, 
   Documents, 
@@ -21,6 +22,7 @@ export {
 
 // Genie pages
 export { 
+  GenieLayout,
   GenieDashboard, 
   GenieAnalytics, 
   GeniePlayground, 

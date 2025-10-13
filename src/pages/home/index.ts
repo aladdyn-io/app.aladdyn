@@ -1,3 +1,6 @@
+// Home layout
+export { HomeLayout } from './HomeLayout';
+
 // Home pages
 export { Dashboard } from './dashboard';
 export { Analytics } from './analytics';

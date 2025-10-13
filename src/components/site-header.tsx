@@ -55,7 +55,7 @@ export function SiteHeader() {
   const currentPageName = routeNames[currentPath] || 'Dashboard'
   const [isHovered, setIsHovered] = useState(false)
   const [hoveredProject, setHoveredProject] = useState<string | null>(null)
-  const [selectedGenie, setSelectedGenie] = useState<string | null>(null)
+
   
   // Get genie name from URL or localStorage
   const getGenieName = () => {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { OnboardingNavbar } from '@/components/OnboardingNavbar'
 import { Button, Card, CardTitle, CardDescription, CardContent, Input, Label } from '@/ui/components'
+import { toast } from 'sonner'
 import { 
   CheckCircle, 
   Globe, 
@@ -220,6 +221,10 @@ export function Onboarding() {
     setCrawlStats(null)
     setCurrentlyScraping(cleanUrl)
     
+    toast.info('Starting website scraping...', {
+      description: 'This may take a few moments depending on the website size.'
+    })
+    
     const params = new URLSearchParams({
       userId,
       url: cleanUrl,
@@ -324,6 +329,7 @@ export function Onboarding() {
           }
         } catch (error) {
           console.error('Failed to parse SSE data:', error)
+          toast.error('Failed to parse streaming data. Please try again.')
         }
       }
       
@@ -407,6 +413,7 @@ export function Onboarding() {
       return result
     } catch (error) {
       console.error('❌ Failed to save URL selection:', error)
+      toast.error('Failed to save URL selection. Please try again.')
       throw error
     }
   }
@@ -448,6 +455,7 @@ export function Onboarding() {
       return result
     } catch (error) {
       console.error('❌ Failed to save admin prompt:', error)
+      toast.error('Failed to save prompt. Please try again.')
       throw error
     }
   }
@@ -490,6 +498,7 @@ export function Onboarding() {
       return result
     } catch (error) {
       console.error('❌ Failed to save custom prompt:', error)
+      toast.error('Failed to save custom prompt. Please try again.')
       throw error
     }
   }
@@ -506,7 +515,7 @@ export function Onboarding() {
       } catch (error) {
         console.error('Scraping error:', error)
         setIsLoading(false)
-        alert('Failed to scrape website. Please try again.')
+        toast.error('Failed to scrape website. Please try again.')
       }
     } else if (currentStep === 'scrape') {
       setIsLoading(true)
@@ -518,7 +527,7 @@ export function Onboarding() {
       } catch (error) {
         console.error('URL selection error:', error)
         setIsLoading(false)
-        alert('Failed to save URL selection. Please try again.')
+        toast.error('Failed to save URL selection. Please try again.')
       }
     } else if (currentStep === 'prompt') {
       setIsLoading(true)
@@ -538,16 +547,22 @@ export function Onboarding() {
       } catch (error) {
         console.error('Prompt submission error:', error)
         setIsLoading(false)
-        alert(error instanceof Error ? error.message : 'Failed to save prompt. Please try again.')
+        toast.error(error instanceof Error ? error.message : 'Failed to save prompt. Please try again.')
       }
     }
   }
 
   const handleDeploy = async () => {
     setIsLoading(true)
+    toast.info('Deploying your genie...', {
+      description: 'This may take a few moments.'
+    })
     await new Promise(resolve => setTimeout(resolve, 3000))
     setDeployedUrl('https://your-agent.example.com')
     setIsLoading(false)
+    toast.success('Genie deployed successfully!', {
+      description: 'Your AI agent is now live and ready to help visitors.'
+    })
   }
 
   const getStepNumber = (step: OnboardingStep) => {

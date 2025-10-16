@@ -74,11 +74,11 @@ export function SubscriptionManagement() {
       ]);
 
       if (subResponse.success && subResponse.data) {
-        setSubscription(subResponse.data);
+        setSubscription(subResponse.data as Subscription);
       }
 
       if (paymentsResponse.success && paymentsResponse.data) {
-        setPayments(paymentsResponse.data);
+        setPayments(paymentsResponse.data as Payment[]);
       }
     } catch (error) {
       console.error('Error fetching subscription data:', error);
@@ -97,7 +97,7 @@ export function SubscriptionManagement() {
       
       if (response.success) {
         toast.success('Subscription will be cancelled at the end of the billing period');
-        setSubscription(response.data);
+        setSubscription(response.data as Subscription);
         setCancelDialogOpen(false);
       }
     } catch (error) {

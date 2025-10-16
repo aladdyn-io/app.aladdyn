@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Bot, Sparkles, ArrowRight } from 'lucide-react'
+import { toast } from 'sonner'
 
 export function CreateGenie() {
   const navigate = useNavigate()
@@ -13,18 +14,33 @@ export function CreateGenie() {
   const [isCreating, setIsCreating] = useState(false)
 
   const handleCreateGenie = async () => {
-    if (!genieName.trim()) return
+    if (!genieName.trim()) {
+      toast.error('Please enter a genie name')
+      return
+    }
     
     setIsCreating(true)
+    toast.info('Creating your genie...', {
+      description: 'Setting up your AI agent.'
+    })
     
-    // Simulate genie creation
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Generate a mock genie ID
-    const genieId = 'genie_' + Date.now()
-    
-    // Navigate to onboarding with the new genie ID
-    navigate(`/onboarding/${genieId}`)
+    try {
+      // Simulate genie creation
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Generate a mock genie ID
+      const genieId = 'genie_' + Date.now()
+      
+      toast.success('Genie created successfully!', {
+        description: 'Redirecting to setup...'
+      })
+      
+      // Navigate to onboarding with the new genie ID
+      navigate(`/onboarding/${genieId}`)
+    } catch (error) {
+      toast.error('Failed to create genie. Please try again.')
+      setIsCreating(false)
+    }
   }
 
   return (

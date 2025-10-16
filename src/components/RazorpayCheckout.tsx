@@ -38,10 +38,9 @@ interface RazorpayCheckoutProps {
 export function useRazorpayCheckout({
   planId,
   planName,
-  amount,
   onSuccess,
   onError,
-}: RazorpayCheckoutProps) {
+}: Omit<RazorpayCheckoutProps, 'amount'>) {
   useEffect(() => {
     // Load Razorpay script
     const script = document.createElement('script');
@@ -68,7 +67,12 @@ export function useRazorpayCheckout({
         throw new Error('Failed to create payment order');
       }
 
-      const { orderId, amount: orderAmount, currency, razorpayKeyId } = orderResponse.data;
+      const { orderId, amount: orderAmount, currency, razorpayKeyId } = orderResponse.data as {
+        orderId: string;
+        amount: number;
+        currency: string;
+        razorpayKeyId: string;
+      };
 
       const options: RazorpayOptions = {
         key: razorpayKeyId,
@@ -90,7 +94,7 @@ export function useRazorpayCheckout({
 
             if (verifyResponse.success && verifyResponse.data) {
               toast.success('Payment successful! Your subscription is now active.');
-              onSuccess(verifyResponse.data.subscription);
+              onSuccess((verifyResponse.data as { subscription: any }).subscription);
             } else {
               throw new Error('Payment verification failed');
             }

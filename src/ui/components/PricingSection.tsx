@@ -92,7 +92,6 @@ export const PricingSection: React.FC = () => {
   const { initiatePayment } = useRazorpayCheckout({
     planId: selectedPlan?.id || '',
     planName: selectedPlan?.displayName || '',
-    amount: selectedPlan?.price || 0,
     onSuccess: (subscription) => {
       setActiveSubscription(subscription);
       toast.success('Subscription activated successfully!');
@@ -113,7 +112,7 @@ export const PricingSection: React.FC = () => {
       const response = await api.getPricingPlans();
       if (response.success && response.data) {
         // Sort plans: Freemium, Basic, Ecommerce, Pro, then Enterprise last
-        const sortedPlans = response.data.sort((a: PricingPlan, b: PricingPlan) => {
+        const sortedPlans = (response.data as PricingPlan[]).sort((a: PricingPlan, b: PricingPlan) => {
           const order = ['freemium', 'basic', 'ecommerce', 'pro', 'enterprise'];
           return order.indexOf(a.name) - order.indexOf(b.name);
         });

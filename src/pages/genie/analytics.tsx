@@ -3,8 +3,16 @@ import EventsView from '../../components/analytics/EventsView';
 import SessionsView from '../../components/analytics/SessionsView';
 import ReportsView from '../../components/analytics/ReportsView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/components/Tabs';
+import { toast } from 'sonner';
+import { useEffect } from 'react';
 
 export function GenieAnalytics() {
+  useEffect(() => {
+    toast.info('Analytics Dashboard Loaded', {
+      description: 'View your genie\'s performance metrics and insights.'
+    })
+  }, [])
+
   return (
     <div className="space-y-6">
       <div>

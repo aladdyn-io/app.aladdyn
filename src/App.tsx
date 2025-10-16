@@ -25,7 +25,6 @@ import {
   HomeLayout,
   GenieLayout,
   CreateGenie,
-  YouTubeDemo
 } from '@/pages';
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -49,7 +48,6 @@ function App() {
         <Route path="/widget" element={<ProtectedRoute><Widget /></ProtectedRoute>} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/dashboard-v2" element={<ProtectedRoute><DashboardV2 /></ProtectedRoute>} />
-        <Route path="/youtube-demo" element={<YouTubeDemo />} />
         
         {/* Protected Home pages */}
         <Route path="/" element={<ProtectedRoute><HomeLayout /></ProtectedRoute>}>

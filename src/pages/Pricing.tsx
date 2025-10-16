@@ -1,5 +1,4 @@
 import { PricingSectionNew } from '../ui/components/PricingSectionNew';
-import { ThemeToggle } from '../ui/components/ThemeToggle';
 
 export function Pricing() {
   return (

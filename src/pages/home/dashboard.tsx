@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { EyeIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '@/services/api';
 
 interface Genie {
@@ -44,12 +43,18 @@ export function Dashboard() {
           ? (response.data as any).otherGenies || []
           : (response.data as any).userGenies || [];
         setGenies(geniesToShow);
+        
+        if (geniesToShow.length === 0) {
+          toast.info('No genies found. Create your first genie to get started!');
+        }
       } else {
         setGenies([]);
+        toast.error('Failed to load genies. Please try again.');
       }
     } catch (error) {
       console.error('Error fetching genies:', error);
       setGenies([]);
+      toast.error('Failed to load genies. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }

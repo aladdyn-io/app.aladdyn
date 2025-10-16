@@ -3,10 +3,17 @@ import { Card, CardContent } from '@/ui/components/Card';
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
+import { toast } from 'sonner'
+import { useEffect } from 'react'
 
 import data from "@/data/dashboard-data.json"
 
 export function GenieDashboard() {
+  useEffect(() => {
+    toast.success('Welcome to your Genie Dashboard!', {
+      description: 'Monitor your AI agent\'s performance and interactions.'
+    })
+  }, [])
 
   return (
     <>

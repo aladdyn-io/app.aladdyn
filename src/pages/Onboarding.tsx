@@ -557,16 +557,52 @@ export function Onboarding() {
   }
 
   const handleDeploy = async () => {
+    if (!websiteData?.genieId) {
+      console.error('No genieId available for deployment')
+      toast.error('Unable to deploy. Please restart the onboarding process.')
+      return
+    }
+
     setIsLoading(true)
+    const backendUrl = getBackendUrl()
+    
     toast.info('Deploying your genie...', {
       description: 'This may take a few moments.'
     })
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    setDeployedUrl('https://your-agent.example.com')
-    setIsLoading(false)
-    toast.success('Genie deployed successfully!', {
-      description: 'Your AI agent is now live and ready to help visitors.'
-    })
+
+    try {
+      const response = await fetch(`${backendUrl}/api/onboarding/create-chatbot`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          stage: 5,
+          genieId: websiteData.genieId,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to create chatbot')
+      }
+
+      const result = await response.json()
+      console.log('✅ Chatbot created:', result)
+
+      // Set the deployed URL (you might want to construct this based on your domain)
+      const chatbotUrl = `${window.location.origin}/chat/${websiteData.genieId}`
+      setDeployedUrl(chatbotUrl)
+      
+      setIsLoading(false)
+      toast.success('Genie deployed successfully!', {
+        description: `${result.urlsIngested} pages ingested. Your AI agent is now live and ready to help visitors.`
+      })
+    } catch (error) {
+      console.error('❌ Failed to deploy chatbot:', error)
+      setIsLoading(false)
+      toast.error(error instanceof Error ? error.message : 'Failed to deploy genie. Please try again.')
+    }
   }
 
   const getStepNumber = (step: OnboardingStep) => {

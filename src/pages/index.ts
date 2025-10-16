@@ -35,3 +35,6 @@ export {
 
 // Create Genie
 export { CreateGenie } from './CreateGenie';
+
+// YouTube Demo
+export { YouTubeDemo } from './YouTubeDemo';

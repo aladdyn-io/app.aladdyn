@@ -1,83 +1,17 @@
+
 import { Card, CardContent } from '@/ui/components/Card';
-import { StatCard } from '@/components/StatCard';
-import { VisitorsChart } from '@/components/VisitorsChart';
-import { DashboardTable } from '@/ui/components/table/DashboardTable';
-import { 
-  CurrencyDollarIcon,
-  UserGroupIcon,
-  UserIcon,
-  ChartBarIcon
-} from '@heroicons/react/24/outline';
+import { ChartAreaInteractive } from "@/components/chart-area-interactive"
+import { DataTable } from "@/components/data-table"
+import { SectionCards } from "@/components/section-cards"
+
+import data from "@/data/dashboard-data.json"
 
 export function GenieDashboard() {
-  const stats = [
-    {
-      title: 'Total Revenue',
-      value: '$1,250.00',
-      change: '12.5%',
-      changeType: 'positive' as const,
-      description: 'Trending up this month',
-      icon: <CurrencyDollarIcon className="h-5 w-5" />,
-    },
-    {
-      title: 'New Customers',
-      value: '1,234',
-      change: '20%',
-      changeType: 'negative' as const,
-      description: 'Acquisition needs attention',
-      icon: <UserGroupIcon className="h-5 w-5" />,
-    },
-    {
-      title: 'Active Accounts',
-      value: '45,678',
-      change: '12.5%',
-      changeType: 'positive' as const,
-      description: 'Engagement exceed targets',
-      icon: <UserIcon className="h-5 w-5" />,
-    },
-    {
-      title: 'Growth Rate',
-      value: '4.5%',
-      change: '4.5%',
-      changeType: 'positive' as const,
-      description: 'Steady performance increase',
-      icon: <ChartBarIcon className="h-5 w-5" />,
-    },
-  ];
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">Genie Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Welcome to your AI-powered Genie workspace. Monitor performance and manage your intelligent agents.
-        </p>
-      </div>
-
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <StatCard
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            change={stat.change}
-            changeType={stat.changeType}
-            description={stat.description}
-            icon={stat.icon}
-          />
-        ))}
-      </div>
-
-      {/* Visitors Chart */}
-      <VisitorsChart />
-
-      {/* Dashboard Table */}
-      <DashboardTable />
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <>
+    {/* Quick Actions */}
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Onboarding Checklist</h3>
@@ -176,6 +110,18 @@ export function GenieDashboard() {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+
+    <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6"></div>
+      <SectionCards />
+      <div className="px-4 lg:px-6">
+        <ChartAreaInteractive />
+      </div>
+      <DataTable data={data} />
+      </div>
+      </div>
+
+    </>
+  )
 }

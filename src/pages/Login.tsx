@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { showLoginSuccess, showLoginError } from '@/ui/utils/toast'
+import api from '@/services/api'
 
 
 export function Login() {
@@ -25,45 +26,27 @@ export function Login() {
     setAuthError(null)
     setIsAuthenticating(true)
 
-    // Simple test login - remove this and use API call in production
-    if (email && password) {
-      localStorage.setItem('token', 'test-token-' + Date.now())
-      localStorage.setItem('user', JSON.stringify({
-        name: email.split('@')[0],
-        email: email,
-        avatar: '/avatars/user.jpg'
-      }))
-      showLoginSuccess(email.split('@')[0])
-      setTimeout(() => {
-        navigate('/')
-      }, 100)
-      setIsAuthenticating(false)
-      return
-    }
-
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        }
-      )
+      const response = await api.login(email, password)
       
-      if (response.ok) {
-        const data = await response.json()
-        localStorage.setItem('token', data.token)
-        showLoginSuccess(data.user?.name)
+      if (response.success && response.data) {
+        // Store token and user data in localStorage
+        localStorage.setItem('token', (response.data as any).token)
+        localStorage.setItem('user', JSON.stringify({
+          name: (response.data as any).user?.name || email.split('@')[0],
+          email: (response.data as any).user?.email || email,
+          avatar: '/avatars/user.jpg'
+        }))
+        
+        showLoginSuccess((response.data as any).user?.name || email.split('@')[0])
         navigate('/')
       } else {
-        const errorData = await response.json()
-        const errorMessage = errorData.message || 'Login failed'
+        const errorMessage = (response as any).error || 'Login failed'
         setAuthError(errorMessage)
         showLoginError(errorMessage)
       }
-    } catch (err) {
-      const errorMessage = 'Network error - please check your connection'
+    } catch (err: any) {
+      const errorMessage = err.message || 'Network error - please check your connection'
       setAuthError(errorMessage)
       showLoginError(errorMessage)
     } finally {

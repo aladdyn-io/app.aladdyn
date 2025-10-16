@@ -8,6 +8,7 @@ interface PricingCardProps {
   features: string[];
   buttonText: string;
   isPopular?: boolean;
+  isCurrentPlan?: boolean;
   onButtonClick: () => void;
 }
 
@@ -18,18 +19,28 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   features,
   buttonText,
   isPopular = false,
+  isCurrentPlan = false,
   onButtonClick
 }) => {
   return (
     <div className={`relative bg-white rounded-xl border shadow-sm p-6 h-full flex flex-col ${
       isPopular 
         ? 'border-emerald-200 ring-2 ring-emerald-100' 
+        : isCurrentPlan
+        ? 'border-blue-200 ring-2 ring-blue-100'
         : 'border-gray-200'
     }`}>
-      {isPopular && (
+      {isPopular && !isCurrentPlan && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
           <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-medium">
             Popular
+          </span>
+        </div>
+      )}
+      {isCurrentPlan && (
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+          <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+            Current Plan
           </span>
         </div>
       )}
@@ -51,8 +62,11 @@ export const PricingCard: React.FC<PricingCardProps> = ({
       
       <button
         onClick={onButtonClick}
+        disabled={isCurrentPlan}
         className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
-          isPopular
+          isCurrentPlan
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : isPopular
             ? 'bg-emerald-600 text-white hover:bg-emerald-700'
             : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200'
         }`}

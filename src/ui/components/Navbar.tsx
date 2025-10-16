@@ -1,11 +1,16 @@
 import { Link, useLocation } from 'react-router-dom';
 import { HomeIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/ui/utils/cn';
+import { useState, useEffect } from 'react';
+import api from '@/services/api';
 
 import { Breadcrumb } from './Breadcrumb';
 
 export function Navbar() {
   const location = useLocation();
+  const [userGenies, setUserGenies] = useState<any[]>([]);
+  const [otherGenies, setOtherGenies] = useState<any[]>([]);
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -13,41 +18,29 @@ export function Navbar() {
   // Determine sidebar margin based on current route
   const sidebarMargin = location.pathname.startsWith('/genie') ? 'ml-64' : 'ml-64';
 
-  const projects = [
-    { 
-      id: 1, 
-      name: "Vijay's project", 
-      status: 'active', 
-      icon: '🏠',
-      genies: [
-        { id: 101, name: 'LeadBot', status: 'active', icon: '🤖' },
-        { id: 102, name: 'SupportGenie', status: 'active', icon: '🧞♂️' },
-        { id: 103, name: 'EmailBot', status: 'training', icon: '📧' },
-        { id: 104, name: 'AnalyticsAI', status: 'active', icon: '📊' },
-      ]
-    },
-    { 
-      id: 2, 
-      name: 'Marketing Campaign', 
-      status: 'active', 
-      icon: '📈',
-      genies: [
-        { id: 105, name: 'ContentCreator', status: 'active', icon: '✍️' },
-        { id: 106, name: 'SocialMediaBot', status: 'active', icon: '📱' },
-        { id: 107, name: 'AdOptimizer', status: 'active', icon: '🎯' },
-      ]
-    },
-    { 
-      id: 3, 
-      name: 'Support Center', 
-      status: 'inactive', 
-      icon: '🎧',
-      genies: [
-        { id: 108, name: 'TicketBot', status: 'active', icon: '🎫' },
-        { id: 109, name: 'KnowledgeBase', status: 'training', icon: '📚' },
-      ]
-    },
-  ];
+  useEffect(() => {
+    fetchProjectsAndGenies();
+  }, []);
+
+  const fetchProjectsAndGenies = async () => {
+    try {
+      const response = await api.getProjectsAndGenies();
+      if (response.success && response.data) {
+        const { userGenies: userGen, otherGenies: otherGen } = (response.data as any);
+        setUserGenies(userGen || []);
+        setOtherGenies(otherGen || []);
+      } else {
+        setUserGenies([]);
+        setOtherGenies([]);
+      }
+    } catch (error) {
+      console.error('Error fetching projects and genies:', error);
+      setUserGenies([]);
+      setOtherGenies([]);
+    } finally {
+      // Loading completed
+    }
+  };
 
 
 
@@ -84,17 +77,17 @@ export function Navbar() {
             >
               <span className="text-lg">🧞♂️</span>
               <span>
-                {(() => {
-                  const genieIdMatch = location.pathname.match(/\/genie\/(\d+)/);
-                  if (genieIdMatch) {
-                    const genieId = parseInt(genieIdMatch[1]);
-                    const allGenies = projects.flatMap(p => p.genies);
-                    const currentGenie = allGenies.find(g => g.id === genieId);
-                    return currentGenie ? currentGenie.name : 'Genie';
+                  {(() => {
+                    const genieIdMatch = location.pathname.match(/\/genie\/([^/]+)/);
+                    if (genieIdMatch) {
+                      const genieWebsiteId = genieIdMatch[1];
+                      const allGenies = [...userGenies, ...otherGenies];
+                      const currentGenie = allGenies.find((g: any) => g.websiteId === genieWebsiteId || g.id === genieWebsiteId);
+                      return currentGenie ? currentGenie.name : 'Genie';
+                    }
+                    return 'Genie';
+                  })()
                   }
-                  return 'Genie';
-                })()
-                }
               </span>
             </Link>
           </div>

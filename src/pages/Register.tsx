@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User } from 'lucide-react'
 import { showRegisterSuccess, showRegisterError } from '@/ui/utils/toast'
+import api from '@/services/api'
 
 export function Register() {
   const navigate = useNavigate()
@@ -22,50 +23,27 @@ export function Register() {
     setError(null)
     setIsLoading(true)
 
-    // Simple test registration - remove this and use API call in production
-    if (name && email && password) {
-      localStorage.setItem('token', 'test-token-' + Date.now())
-      localStorage.setItem('user', JSON.stringify({
-        name: name,
-        email: email,
-        avatar: '/avatars/user.jpg'
-      }))
-      showRegisterSuccess(name)
-      setTimeout(() => {
-        navigate('/')
-      }, 100)
-      setIsLoading(false)
-      return
-    }
-
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password })
-        }
-      )
+      const response = await api.register(name, email, password)
       
-      const data = await response.json()
-      console.log('API Response:', data)
-      
-      if (data.success && data.data) {
-        console.log('Registration successful:', data)
-        localStorage.setItem('token', data.data.token)
-        if (data.data.user) {
-          localStorage.setItem('user', JSON.stringify(data.data.user))
-        }
-        showRegisterSuccess(data.data.user?.name || name)
+      if (response.success && response.data) {
+        // Store token and user data in localStorage
+        localStorage.setItem('token', (response.data as any).token)
+        localStorage.setItem('user', JSON.stringify({
+          name: (response.data as any).user?.name || name,
+          email: (response.data as any).user?.email || email,
+          avatar: '/avatars/user.jpg'
+        }))
+        
+        showRegisterSuccess((response.data as any).user?.name || name)
         navigate('/')
       } else {
-        const errorMessage = data.error || 'Registration failed'
+        const errorMessage = (response as any).error || 'Registration failed'
         setError(errorMessage)
         showRegisterError(errorMessage)
       }
-    } catch (err) {
-      const errorMessage = 'Network error - please check your connection'
+    } catch (err: any) {
+      const errorMessage = err.message || 'Network error - please check your connection'
       setError(errorMessage)
       showRegisterError(errorMessage)
     } finally {

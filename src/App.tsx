@@ -77,7 +77,8 @@ function App() {
           <Route path="settings" element={<GenieSettings />} />
         </Route>
         
-        {/* Default redirect to home */}
+        {/* Fallback route for SPA */}
+        <Route path="*" element={<div>Page not found</div>} />
       </Routes>
       <Toaster />
     </Router>

@@ -86,6 +86,10 @@ interface AdminPrompt {
 export function Onboarding() {
   const { genieId } = useParams<{ genieId?: string }>()
   
+  useEffect(() => {
+    console.log('Onboarding component loaded, genieId:', genieId)
+  }, [genieId])
+  
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('intro')
   const [selectedWebsite, setSelectedWebsite] = useState<string>('')
   const [customWebsite, setCustomWebsite] = useState<string>('')

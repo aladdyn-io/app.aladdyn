@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { OnboardingNavbar } from '@/components/OnboardingNavbar'
+import { CustomizeSection } from '@/components/CustomizeSection'
 import { Button, Card, CardTitle, CardDescription, CardContent, Input, Label } from '@/ui/components'
 import { toast } from 'sonner'
 import { 
@@ -735,18 +736,16 @@ export function Onboarding() {
           </div>
         )}
 
-        {currentStep !== 'intro' && (
+        {currentStep !== 'intro' && currentStep !== 'customize' && (
           <Card className="shadow-lg border-0 bg-white">
             {currentStep !== 'website' && currentStep !== 'scrape' && (
               <div className="px-6 py-4 border-b border-gray-100">
                 <CardTitle className="flex items-center gap-2 text-xl">
                   {currentStep === 'prompt' && <MessageSquare className="w-5 h-5 text-emerald-600" />}
-                  {currentStep === 'customize' && <Bot className="w-5 h-5 text-emerald-600" />}
                   Step {getStepNumber(currentStep)}: {getStepTitle(currentStep)}
                 </CardTitle>
                 <CardDescription className="text-gray-600 mt-1">
                   {currentStep === 'prompt' && 'Choose or customize the agent prompt to define its capabilities'}
-                  {currentStep === 'customize' && 'Customize your agent'}
                 </CardDescription>
               </div>
             )}
@@ -1122,48 +1121,46 @@ export function Onboarding() {
                 </div>
               )}
 
-              {currentStep === 'customize' && (
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">hello</h2>
-                  </div>
-                </div>
-              )}
+              <div className="flex justify-between pt-6 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (currentStep === 'prompt') setCurrentStep('scrape')
+                    if (currentStep === 'scrape') setCurrentStep('website')
+                    if (currentStep === 'website') setCurrentStep('intro')
+                  }}
+                  disabled={currentStep === 'website'}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Previous
+                </Button>
+                <Button
+                  onClick={handleNext}
+                  disabled={!canProceed() || isLoading}
+                  className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 flex items-center"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : currentStep === 'website' ? (
+                    'Next: Scrape Website'
+                  ) : currentStep === 'scrape' ? (
+                    'Next: Configure Agent'
+                  ) : (
+                    'Next: Customize'
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-              {currentStep !== 'customize' && (
-                <div className="flex justify-between pt-6 border-t border-gray-200">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      if (currentStep === 'prompt') setCurrentStep('scrape')
-                      if (currentStep === 'scrape') setCurrentStep('website')
-                      if (currentStep === 'website') setCurrentStep('intro')
-                    }}
-                    disabled={currentStep === 'website'}
-                    className="px-6 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    onClick={handleNext}
-                    disabled={!canProceed() || isLoading}
-                    className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 flex items-center"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : currentStep === 'website' ? (
-                      'Next: Scrape Website'
-                    ) : currentStep === 'scrape' ? (
-                      'Next: Configure Agent'
-                    ) : (
-                      'Next: Customize'
-                    )}
-                  </Button>
-                </div>
-              )}
+        {currentStep === 'customize' && (
+          <Card className="shadow-lg border-0 bg-white">
+            <CardContent className="p-6">
+              <CustomizeSection websiteData={websiteData} />
             </CardContent>
           </Card>
         )}

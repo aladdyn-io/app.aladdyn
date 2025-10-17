@@ -9,7 +9,6 @@ import {
   MessageSquare, 
   Bot, 
   Loader2, 
-  ExternalLink, 
   Check, 
   X, 
   Plus,
@@ -18,7 +17,7 @@ import {
   Code
 } from 'lucide-react'
 
-type OnboardingStep = 'intro' | 'website' | 'scrape' | 'prompt' | 'deploy'
+type OnboardingStep = 'intro' | 'website' | 'scrape' | 'prompt' | 'customize'
 
 interface ScrapedLink {
   id: string
@@ -96,7 +95,6 @@ export function Onboarding() {
   const [selectedPrompt, setSelectedPrompt] = useState<string>('')
   const [customPrompt, setCustomPrompt] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
-  const [deployedUrl, setDeployedUrl] = useState<string>('')
   const [currentlyScraping, setCurrentlyScraping] = useState<string>('')
   const [scrapedLinks, setScrapedLinks] = useState<ScrapedLink[]>([])
   const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null)
@@ -547,7 +545,7 @@ export function Onboarding() {
           throw new Error('Please select or enter a prompt')
         }
         setIsLoading(false)
-        setCurrentStep('deploy')
+        setCurrentStep('customize')
       } catch (error) {
         console.error('Prompt submission error:', error)
         setIsLoading(false)
@@ -556,57 +554,9 @@ export function Onboarding() {
     }
   }
 
-  const handleDeploy = async () => {
-    if (!websiteData?.genieId) {
-      console.error('No genieId available for deployment')
-      toast.error('Unable to deploy. Please restart the onboarding process.')
-      return
-    }
-
-    setIsLoading(true)
-    const backendUrl = getBackendUrl()
-    
-    toast.info('Deploying your genie...', {
-      description: 'This may take a few moments.'
-    })
-
-    try {
-      const response = await fetch(`${backendUrl}/api/onboarding/create-chatbot`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          stage: 5,
-          genieId: websiteData.genieId,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Failed to create chatbot')
-      }
-
-      const result = await response.json()
-      console.log('✅ Chatbot created:', result)
-
-      // Set the deployed URL (you might want to construct this based on your domain)
-      const chatbotUrl = `${window.location.origin}/chat/${websiteData.genieId}`
-      setDeployedUrl(chatbotUrl)
-      
-      setIsLoading(false)
-      toast.success('Genie deployed successfully!', {
-        description: `${result.urlsIngested} pages ingested. Your AI agent is now live and ready to help visitors.`
-      })
-    } catch (error) {
-      console.error('❌ Failed to deploy chatbot:', error)
-      setIsLoading(false)
-      toast.error(error instanceof Error ? error.message : 'Failed to deploy genie. Please try again.')
-    }
-  }
 
   const getStepNumber = (step: OnboardingStep) => {
-    const steps = ['intro', 'website', 'scrape', 'prompt', 'deploy']
+    const steps = ['intro', 'website', 'scrape', 'prompt', 'customize']
     return steps.indexOf(step) + 1
   }
 
@@ -616,7 +566,7 @@ export function Onboarding() {
       case 'website': return 'Select Website'
       case 'scrape': return 'Scrape & Review'
       case 'prompt': return 'Configure Agent'
-      case 'deploy': return 'Deploy & Test'
+      case 'customize': return 'Customize'
       default: return ''
     }
   }
@@ -627,7 +577,7 @@ export function Onboarding() {
       case 'website': return selectedWebsite || customWebsite
       case 'scrape': return scrapedLinks.length > 0
       case 'prompt': return selectedPrompt || customPrompt
-      case 'deploy': return deployedUrl
+      case 'customize': return true
       default: return false
     }
   }
@@ -638,7 +588,7 @@ export function Onboarding() {
       case 'website': return selectedWebsite || customWebsite
       case 'scrape': return scrapedLinks.length > 0
       case 'prompt': return selectedPrompt || customPrompt
-      case 'deploy': return true
+      case 'customize': return true
       default: return false
     }
   }
@@ -759,7 +709,7 @@ export function Onboarding() {
             <div className="flex items-center justify-between relative">
               <div className="absolute top-4 left-8 right-8 h-1 bg-gray-200 rounded-full"></div>
               
-              {(['website', 'scrape', 'prompt', 'deploy'] as OnboardingStep[]).map((step) => (
+              {(['website', 'scrape', 'prompt', 'customize'] as OnboardingStep[]).map((step) => (
                 <div key={step} className="flex flex-col items-center relative z-10">
                   <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
                     currentStep === step 
@@ -791,12 +741,12 @@ export function Onboarding() {
               <div className="px-6 py-4 border-b border-gray-100">
                 <CardTitle className="flex items-center gap-2 text-xl">
                   {currentStep === 'prompt' && <MessageSquare className="w-5 h-5 text-emerald-600" />}
-                  {currentStep === 'deploy' && <Bot className="w-5 h-5 text-emerald-600" />}
+                  {currentStep === 'customize' && <Bot className="w-5 h-5 text-emerald-600" />}
                   Step {getStepNumber(currentStep)}: {getStepTitle(currentStep)}
                 </CardTitle>
                 <CardDescription className="text-gray-600 mt-1">
                   {currentStep === 'prompt' && 'Choose or customize the agent prompt to define its capabilities'}
-                  {currentStep === 'deploy' && 'Your agent is ready! Test it on your website'}
+                  {currentStep === 'customize' && 'Customize your agent'}
                 </CardDescription>
               </div>
             )}
@@ -1172,94 +1122,15 @@ export function Onboarding() {
                 </div>
               )}
 
-              {currentStep === 'deploy' && (
+              {currentStep === 'customize' && (
                 <div className="space-y-6">
-                  {!deployedUrl ? (
-                    <div className="text-center">
-                      <Button 
-                        onClick={handleDeploy} 
-                        disabled={isLoading}
-                        className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 flex items-center"
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Deploying Agent...
-                          </>
-                        ) : (
-                          'Deploy Agent'
-                        )}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg">
-                        <div className="flex items-center gap-2 text-green-800">
-                          <CheckCircle className="w-5 h-5" />
-                          <span className="font-bold text-lg">Agent Deployed Successfully!</span>
-                        </div>
-                        <p className="text-sm text-green-700 mt-1">
-                          Your agent is now live and ready to help your customers.
-                        </p>
-                      </div>
-
-                      <div className="text-center space-y-4">
-                        <div className="relative max-w-4xl mx-auto">
-                          <div className="relative bg-gray-800 rounded-t-xl p-4 shadow-lg">
-                            <div className="relative bg-black rounded-lg overflow-hidden" style={{ aspectRatio: 1.6 }}>
-                              <div className="absolute inset-0 bg-gray-900 rounded-lg p-1">
-                                <div className="w-full h-full bg-white rounded relative overflow-hidden">
-                                  <div className="absolute top-2 left-2 bg-white px-2 py-1 rounded shadow-sm z-10">
-                                    <span className="text-xs font-medium text-gray-600">
-                                      {customWebsite.replace(/^https?:\/\//, '').replace(/^www\./, '')}
-                                    </span>
-                                  </div>
-                                  
-                                  <div className="absolute top-2 right-2 bg-gradient-to-r from-emerald-600 to-emerald-800 text-white px-2 py-1 rounded shadow-sm z-10">
-                                    <span className="text-xs font-bold">AI Agent Active</span>
-                                  </div>
-                                  
-                                  <div className="absolute bottom-3 right-3 w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:from-emerald-700 hover:to-emerald-900 transition-all duration-300 animate-pulse z-10">
-                                    <MessageSquare className="w-4 h-4 text-white" />
-                                  </div>
-                                  
-                                  <iframe
-                                    src={customWebsite.startsWith('http') ? customWebsite : `https://${customWebsite}`}
-                                    className="w-full h-full border-0"
-                                    title="Website Preview"
-                                    sandbox="allow-scripts allow-same-origin allow-forms"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="h-2 bg-gray-700 rounded-b-xl"></div>
-                          </div>
-                          
-                          <div className="text-center mt-4">
-                            <Button 
-                              variant="outline" 
-                              onClick={() => {
-                                const encodedUrl = encodeURIComponent(customWebsite.startsWith('http') ? customWebsite : `https://${customWebsite}`)
-                                if (websiteData) {
-                                  localStorage.setItem('currentWebsiteId', websiteData.website_id)
-                                }
-                                window.open(`/preview/${encodedUrl}`, '_blank')
-                              }}
-                              className="gap-2 px-6 py-2 text-sm border border-emerald-200 text-emerald-700 hover:bg-emerald-50 flex items-center"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              Open in Full Screen
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">hello</h2>
+                  </div>
                 </div>
               )}
 
-              {currentStep !== 'deploy' && (
+              {currentStep !== 'customize' && (
                 <div className="flex justify-between pt-6 border-t border-gray-200">
                   <Button
                     variant="outline"
@@ -1288,7 +1159,7 @@ export function Onboarding() {
                     ) : currentStep === 'scrape' ? (
                       'Next: Configure Agent'
                     ) : (
-                      'Next: Deploy Agent'
+                      'Next: Customize'
                     )}
                   </Button>
                 </div>

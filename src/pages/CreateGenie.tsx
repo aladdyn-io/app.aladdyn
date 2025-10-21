@@ -36,7 +36,7 @@ export function CreateGenie() {
       })
       
       // Navigate to onboarding with the new genie ID
-      navigate(`/onboarding/${genieId}`)
+      navigate(`/create/${genieId}`)
     } catch (error) {
       toast.error('Failed to create genie. Please try again.')
       setIsCreating(false)

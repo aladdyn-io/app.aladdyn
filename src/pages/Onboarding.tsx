@@ -17,6 +17,7 @@ import {
   Sparkles,
   Code
 } from 'lucide-react'
+import { getUserId } from '@/lib/utils'
 
 type OnboardingStep = 'intro' | 'website' | 'scrape' | 'prompt' | 'customize'
 
@@ -108,37 +109,116 @@ export function Onboarding() {
 
   // Load existing genie data if genieId is provided in URL
   useEffect(() => {
-    if (genieId) {
-      console.log('📋 Loading existing genie:', genieId)
-      
-      // Store genieId in localStorage
-      localStorage.setItem('currentGenieId', genieId)
-      
-      // If coming from a URL with genieId, assume we're continuing from a previous session
-      // Skip intro and go to prompt configuration or scrape review
-      const storedWebsiteData = localStorage.getItem(`websiteData_${genieId}`)
-      if (storedWebsiteData) {
-        try {
-          const data = JSON.parse(storedWebsiteData)
-          setWebsiteData(data)
-          setCustomWebsite(data.website_url)
-          
-          // Restore links with selection state if available
-          const links = data.scrapedLinks || (data.internal_links || []).map((url: string, index: number) => ({
-            id: `link_${index}`,
-            url,
-            selected: true
-          }))
-          setScrapedLinks(links)
-          setCurrentStep('prompt') // Skip to prompt step
-        } catch (error) {
-          console.error('Failed to load website data:', error)
+    if (!genieId) return
+
+    console.log('📋 Loading existing genie:', genieId)
+    // Store genieId in localStorage
+    localStorage.setItem('currentGenieId', genieId)
+
+    const backendUrl = getBackendUrl()
+
+    const loadGenie = async () => {
+      try {
+        const res = await fetch(`${backendUrl}/api/onboarding/${genieId}`)
+        if (!res.ok) {
+          throw new Error('Failed to fetch onboarding data')
         }
-      } else {
-        // If no stored data, start from website selection
-        setCurrentStep('website')
+        const payload = await res.json()
+        const genie = payload?.data
+
+        if (genie) {
+          // Map backend stage to UI step
+          const stageToStep: Record<number, OnboardingStep> = {
+            // 1: 'website',
+            1: 'scrape',
+            2: 'prompt',
+            3: 'customize',
+            4: 'customize',
+          }
+
+          if (genie.websiteUrl || genie.website_url || genie.websiteId || genie.website_id) {
+            const restored: WebsiteData = {
+              website_id: genie.websiteId || genie.website_id || getUserId(),
+              website_url: genie.websiteUrl || genie.website_url || '',
+              scraped_doc: genie.scraped_doc || '',
+              genieId: genie.id || genie.genieId || genieId,
+            }
+            setWebsiteData(restored)
+            setCustomWebsite(restored.website_url)
+          }
+
+          // Handle discovered URLs or scraped Pages
+          if (genie.discoveredUrls && Array.isArray(genie.discoveredUrls)) {
+            const links = genie.discoveredUrls.map((u: any, idx: number) => ({ id: `link_${idx}`, url: u.url || u, selected: true }))
+            setScrapedLinks(links)
+          } else if (genie.scrapedPages && Array.isArray(genie.scrapedPages)) {
+            const links = genie.scrapedPages.map((p: any, idx: number) => ({ id: `link_${idx}`, url: p.url || p.pageUrl || p.location, selected: true }))
+            setScrapedLinks(links)
+          }
+
+          const uiStep = stageToStep[genie.stage  || 1] || 'website'
+          setCurrentStep(uiStep)
+          setSelectedPrompt(genie.prompts[0] && genie.prompts[0].id || '')
+          // persist website data in localStorage for continuity
+          if (genie.id || genie.genieId) {
+            localStorage.setItem(`websiteData_${genie.id || genie.genieId}`, JSON.stringify({
+              website_id: genie.websiteId || genie.website_id || getUserId(),
+              website_url: genie.websiteUrl || genie.website_url || '',
+              genieId: genie.id || genie.genieId,
+              scrapedLinks: genie.discoveredUrls ? genie.discoveredUrls.map((u: any, idx: number) => ({ id: `link_${idx}`, url: u.url || u, selected: true })) : undefined,
+            }))
+          }
+        } else {
+          // Fallback to stored website data
+          const storedWebsiteData = localStorage.getItem(`websiteData_${genieId}`)
+          if (storedWebsiteData) {
+            try {
+              const data = JSON.parse(storedWebsiteData)
+              setWebsiteData(data)
+              setCustomWebsite(data.website_url)
+
+              const links = data.scrapedLinks || (data.internal_links || []).map((url: string, index: number) => ({
+                id: `link_${index}`,
+                url,
+                selected: true
+              }))
+              setScrapedLinks(links)
+              setCurrentStep('prompt')
+            } catch (error) {
+              console.error('Failed to load website data:', error)
+              setCurrentStep('website')
+            }
+          } else {
+            setCurrentStep('website')
+          }
+        }
+      } catch (err) {
+        console.log('Could not fetch onboarding genie, fallback to local data', err)
+        const storedWebsiteData = localStorage.getItem(`websiteData_${genieId}`)
+        if (storedWebsiteData) {
+          try {
+            const data = JSON.parse(storedWebsiteData)
+            setWebsiteData(data)
+            setCustomWebsite(data.website_url)
+
+            const links = data.scrapedLinks || (data.internal_links || []).map((url: string, index: number) => ({
+              id: `link_${index}`,
+              url,
+              selected: true
+            }))
+            setScrapedLinks(links)
+            setCurrentStep('prompt')
+          } catch (error) {
+            console.error('Failed to load website data:', error)
+            setCurrentStep('website')
+          }
+        } else {
+          setCurrentStep('website')
+        }
       }
     }
+
+    loadGenie()
   }, [genieId])
 
   // Update localStorage when scraped links selection changes
@@ -157,6 +237,7 @@ export function Onboarding() {
     if (currentStep === 'prompt' && adminPrompts.length === 0) {
       fetchAdminPrompts()
     }
+    console.log('Current step changed to:', currentStep)
   }, [currentStep])
 
   // Fetch admin prompts from API
@@ -215,7 +296,7 @@ export function Onboarding() {
   // Stream-based website scraping using SSE
   const scrapeWebsiteStream = async (mainUrl: string): Promise<void> => {
     const cleanUrl = mainUrl.startsWith('http') ? mainUrl : `https://${mainUrl}`
-    const userId = 'a073171e-e270-4fdb-a574-e40383b97173'
+    const userId = getUserId()
     const backendUrl = getBackendUrl()
     
     // Reset state
@@ -523,6 +604,7 @@ export function Onboarding() {
     } else if (currentStep === 'scrape') {
       setIsLoading(true)
       try {
+        console.log('📤 Sending URL selection to backend...')
         // Send URL selection to backend (Stage 2)
         await sendUrlSelection()
         setIsLoading(false)

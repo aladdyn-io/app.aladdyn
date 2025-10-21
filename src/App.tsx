@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { 
   About, 
   Dashboard, 
@@ -29,6 +29,16 @@ import {
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PublicRoute } from '@/components/PublicRoute';
+import { useParams as _useParams, Navigate as _Navigate } from 'react-router-dom';
+
+// Small helper component to redirect /onboarding/:genieId -> /create/:genieId
+function RedirectOnboarding() {
+  // can't use hook directly in top-level import context; use the router hook here
+  const params = _useParams() as { genieId?: string };
+  const genieId = params?.genieId || '';
+  if (!genieId) return <div>Redirecting...</div>;
+  return <_Navigate to={`/create/${genieId}`} replace />;
+}
 
 function App() {
   return (
@@ -37,6 +47,12 @@ function App() {
         {/* Public pages - redirect to home if already logged in */}
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        
+        {/* Redirect onboarding to create */}
+        <Route
+          path="/onboarding/:genieId"
+          element={<RedirectOnboarding />}
+        />
         
         {/* Onboarding pages without layout */}
         <Route path="/create-genie" element={<ProtectedRoute><CreateGenie /></ProtectedRoute>} />

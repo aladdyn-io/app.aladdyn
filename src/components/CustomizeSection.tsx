@@ -264,9 +264,9 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
         description: 'Your AI assistant is now live and ready to use.',
       })
 
-      // Redirect to dashboard or show embed code
-      if (result.url) {
-        window.location.href = result.url
+      // Redirect to dashboard after successful deployment
+      if (websiteData?.genieId) {
+        window.location.href = `/genie/${websiteData.genieId}`;
       }
     } catch (error) {
       console.error('❌ Failed to deploy chatbot:', error)

@@ -119,12 +119,15 @@ export function Dashboard() {
         <div className="space-y-4">
           {genies.map((genie) => {
             const thumbnailImage = getThumbnailImage(genie);
+            const cardHref = genie.status === 'training'
+              ? `/create/${genie.id}`
+              : `/genie/${genie.websiteId || genie.id}`;
             return (
               // List View
               <Card 
                 key={genie.id} 
                 className="py-4  transition-all duration-200 cursor-pointer shadow-none"
-                onClick={() => window.location.href = `/genie/${genie.websiteId || genie.id}`}
+                onClick={() => window.location.href = cardHref}
               >
                 <CardContent className="px-6">
                   <div className="flex items-center justify-between">
@@ -162,7 +165,7 @@ export function Dashboard() {
                             className=" text-sm text-blue-600 hover:text-blue-800 hover:underline block truncate w-fit"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {genie.websiteUrl}
+                            {genie.websiteUrl} 
                           </a>
                         )}
                         {isOtherRoute && genie.owner && (

@@ -1,6 +1,5 @@
 import * as React from "react"
 import {
-  ArrowUpCircleIcon,
   BarChartIcon,
   CameraIcon,
   ClipboardListIcon,
@@ -135,8 +134,8 @@ export function GenieSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="/genie">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">genie</span>
+                <img className="h-7 w-7 " src="/gene.png" alt="genie" />
+                <span className="text-xl font-semibold">Genie</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

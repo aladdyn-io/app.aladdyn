@@ -1,7 +1,6 @@
 import * as React from "react"
 import { useState, useEffect } from "react"
 import {
-  ArrowUpCircleIcon,
   BarChartIcon,
   CameraIcon,
   ClipboardListIcon,
@@ -207,8 +206,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="/">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">aladdyn</span>
+                <img className="h-7 w-7" src="/gene.png" alt="Aladdyn" />
+                <span className="text-xl font-semibold">Aladdyn</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

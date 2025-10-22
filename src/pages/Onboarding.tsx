@@ -94,6 +94,8 @@ export function Onboarding() {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('intro')
   const [selectedWebsite, setSelectedWebsite] = useState<string>('')
   const [customWebsite, setCustomWebsite] = useState<string>('')
+  const [genieName, setGenieName] = useState<string>('')
+  const [formError, setFormError] = useState<string>('')
   const [selectedPrompt, setSelectedPrompt] = useState<string>('')
   const [customPrompt, setCustomPrompt] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
@@ -298,26 +300,38 @@ export function Onboarding() {
     const cleanUrl = mainUrl.startsWith('http') ? mainUrl : `https://${mainUrl}`
     const userId = getUserId()
     const backendUrl = getBackendUrl()
-    
+
     // Reset state
     setScrapedLinks([])
     setStreamMessages([])
     setCrawlStats(null)
     setCurrentlyScraping(cleanUrl)
-    
+
     toast.info('Starting website scraping...', {
       description: 'This may take a few moments depending on the website size.'
     })
-    
+
+    // Send genieName in POST body before starting SSE
+    await fetch(`${backendUrl}/api/onboarding`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        stage: 1,
+        userId,
+        url: cleanUrl,
+        type: 'onboarding',
+        genieName: genieName || 'Enterprise Genie',
+      }),
+    })
     const params = new URLSearchParams({
       userId,
       url: cleanUrl,
       type: 'onboarding',
       maxPages: '100'
     })
-    
     const eventSource = new EventSource(`${backendUrl}/api/onboarding/stream?${params}`)
-    
     return new Promise((resolve, reject) => {
       eventSource.onmessage = (event) => {
         try {
@@ -591,6 +605,12 @@ export function Onboarding() {
     if (currentStep === 'intro') {
       setCurrentStep('website')
     } else if (currentStep === 'website') {
+      // Validate Genie Name and Website URL
+      if (!genieName.trim() || !customWebsite.trim()) {
+        setFormError('Genie Name and Website URL are required.')
+        return
+      }
+      setFormError('')
       setIsLoading(true)
       try {
         await scrapeWebsiteStream(customWebsite)
@@ -845,10 +865,25 @@ export function Onboarding() {
                   
                   <div className="mx-auto space-y-4">
                     <div>
-                      <Label htmlFor="custom-website" className="text-sm font-medium text-gray-700">
-                        Enter your website URL
+                      <Label htmlFor="genie-name" className="text-sm font-medium text-gray-700">
+                        Genie Name <span className="text-red-500">*</span>
                       </Label>
                       <Input
+                        required
+                        id="genie-name"
+                        type="text"
+                        placeholder="Enter a name for your agent (e.g. Enterprise Genie)"
+                        value={genieName}
+                        onChange={(e) => setGenieName(e.target.value)}
+                        className="mt-2 mb-4"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="custom-website" className="text-sm font-medium text-gray-700">
+                        Enter your website URL <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        required
                         id="custom-website"
                         type="url"
                         placeholder="https://your-website.com"
@@ -857,6 +892,11 @@ export function Onboarding() {
                         className="mt-2"
                       />
                     </div>
+                    {formError && (
+                      <div className="text-red-500 text-sm mt-2 mb-2 text-center font-medium">
+                        {formError}
+                      </div>
+                    )}
 
                     <div className="text-center text-gray-500 text-sm">or</div>
 

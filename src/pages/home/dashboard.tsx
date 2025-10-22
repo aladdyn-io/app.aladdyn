@@ -127,7 +127,11 @@ export function Dashboard() {
               <Card 
                 key={genie.id} 
                 className="py-4  transition-all duration-200 cursor-pointer shadow-none"
-                onClick={() => window.location.href = cardHref}
+                onClick={() => {
+                  // Store the selected genie ID in localStorage
+                  localStorage.setItem('currentGenieId', genie.id);
+                  window.location.href = cardHref;
+                }}
               >
                 <CardContent className="px-6">
                   <div className="flex items-center justify-between">

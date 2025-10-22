@@ -17,3 +17,12 @@ export const getUserId = () => {
   }
   return ''
 }
+
+export const getCurrentGenieId = () => {
+  try {
+    const genieId = localStorage.getItem('currentGenieId')
+    return genieId || ''
+  } catch {
+    return ''
+  }
+}

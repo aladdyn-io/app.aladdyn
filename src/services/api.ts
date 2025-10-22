@@ -145,6 +145,113 @@ class ApiService {
     
     return this.handleResponse(response);
   }
+
+  // Chatlogs APIs
+  async getConversations(
+    geniId: string,
+    limit: number = 20,
+    cursor?: string,
+    status?: string,
+    hasContact?: boolean,
+    searchText?: string
+  ) {
+    const params = new URLSearchParams();
+    params.append('geniId', geniId);
+    params.append('limit', limit.toString());
+    if (cursor) params.append('cursor', cursor);
+    if (status) params.append('status', status);
+    if (hasContact !== undefined) params.append('hasContact', hasContact.toString());
+    if (searchText) params.append('searchText', searchText);
+
+    const response = await fetch(`${API_BASE_URL}/chatlogs/conversations?${params}`, {
+      headers: this.getAuthHeaders(),
+    });
+    
+    return this.handleResponse(response);
+  }
+
+  async getConversation(conversationId: string, limit: number = 50, cursor?: string) {
+    const params = new URLSearchParams();
+    params.append('limit', limit.toString());
+    if (cursor) params.append('cursor', cursor);
+
+    const response = await fetch(
+      `${API_BASE_URL}/chatlogs/conversation/${conversationId}?${params}`,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
+    
+    return this.handleResponse(response);
+  }
+
+  async getConversationStats(geniId: string) {
+    const response = await fetch(`${API_BASE_URL}/chatlogs/stats/${geniId}`, {
+      headers: this.getAuthHeaders(),
+    });
+    
+    return this.handleResponse(response);
+  }
+
+  async updateConversationStatus(conversationId: string, status: string) {
+    const response = await fetch(
+      `${API_BASE_URL}/chatlogs/conversation/${conversationId}/status`,
+      {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ status }),
+      }
+    );
+    
+    return this.handleResponse(response);
+  }
+
+  async deleteConversation(conversationId: string) {
+    const response = await fetch(
+      `${API_BASE_URL}/chatlogs/conversation/${conversationId}`,
+      {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
+      }
+    );
+    
+    return this.handleResponse(response);
+  }
+
+  async bulkDeleteJunk(geniId: string) {
+    const response = await fetch(`${API_BASE_URL}/chatlogs/bulk-delete-junk`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ geniId }),
+    });
+    
+    return this.handleResponse(response);
+  }
+
+  async exportConversations(geniId: string, format: 'json' | 'csv', status?: string) {
+    const params = new URLSearchParams();
+    params.append('geniId', geniId);
+    params.append('format', format);
+    if (status) params.append('status', status);
+
+    const response = await fetch(`${API_BASE_URL}/chatlogs/export?${params}`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to export conversations');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `conversations.${format}`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
 }
 
 export const api = new ApiService();

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ColorPicker from 'react-best-gradient-color-picker'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -8,6 +8,37 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Save, Palette, Type, Layout, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
+
+// Error Boundary Component for ColorPicker
+class ColorPickerErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback?: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(_error: Error) {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ColorPicker Error:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800 text-sm">Color picker temporarily unavailable. Please refresh the page.</p>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
 
 interface WebsiteData {
   website_id: string
@@ -162,9 +193,13 @@ const DEFAULT_THEMES = {
 
 interface CustomizeSectionProps {
   websiteData: WebsiteData | null
+  genieId?: string
 }
 
-export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
+export function CustomizeSection({ websiteData, genieId: propGenieId }: CustomizeSectionProps) {
+  // Use prop genieId if provided, otherwise try websiteData.genieId, otherwise use getCurrentGenieId
+  const genieId = propGenieId || websiteData?.genieId;
+
   const [styles, setStyles] = useState<CustomizeStyles>(DEFAULT_THEMES.professional.styles)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeploying, setIsDeploying] = useState(false)
@@ -183,12 +218,12 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
       sp.set(key, value)
     })
 
-    sp.set('genieId', websiteData?.genieId || '')
+    sp.set('genieId', genieId || '')
     return url.toString()
   }
 
   const handleSave = async () => {
-    if (!websiteData?.genieId) {
+    if (!genieId) {
       toast.error('No Genie ID found')
       return
     }
@@ -204,7 +239,7 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
         },
         body: JSON.stringify({
           stage: 4,
-          genieId: websiteData.genieId,
+          genieId: genieId,
           styles: styles,
         }),
       })
@@ -228,7 +263,7 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
   }
 
   const handleDeploy = async () => {
-    if (!websiteData?.genieId) {
+    if (!genieId) {
       toast.error('No Genie ID found')
       return
     }
@@ -248,7 +283,7 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
         },
         body: JSON.stringify({
           stage: 5,
-          genieId: websiteData.genieId,
+          genieId: genieId,
         }),
       })
 
@@ -265,8 +300,8 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
       })
 
       // Redirect to dashboard after successful deployment
-      if (websiteData?.genieId) {
-        window.location.href = `/genie/${websiteData.genieId}`;
+      if (genieId) {
+        window.location.href = `/genie/${genieId}`;
       }
     } catch (error) {
       console.error('❌ Failed to deploy chatbot:', error)
@@ -296,17 +331,30 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
     const [tempColor, setTempColor] = useState(value)
 
     // Update temp color when value changes externally
-    useState(() => {
+    useEffect(() => {
       setTempColor(value)
-    })
+    }, [value])
 
     const handleColorChange = (newColor: string) => {
-      setTempColor(newColor)
+      try {
+        // Always update the temp color - let user see changes in real-time
+        if (newColor) {
+          setTempColor(newColor)
+        }
+      } catch (error) {
+        console.warn('Invalid color value received:', newColor, error)
+      }
     }
 
     const handleApply = () => {
-      onChange(tempColor)
-      setActiveColorPicker(null)
+      try {
+        // Apply the color as-is without sanitization
+        onChange(tempColor)
+        setActiveColorPicker(null)
+      } catch (error) {
+        console.error('Error applying color:', error)
+        toast.error('Invalid color value. Please try again.')
+      }
     }
 
     const handleCancel = () => {
@@ -314,15 +362,42 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
       setActiveColorPicker(null)
     }
 
+    // Sanitize color for ColorPicker component to prevent parsing errors
+    const sanitizeForPicker = (color: string): string => {
+      if (!color) return '#ffffff'
+      
+      // Check for NaN or other invalid patterns that crash the picker
+      if (color.includes('NaN') || color.includes('undefined') || color.includes('null')) {
+        return '#ffffff'
+      }
+      
+      // For gradients, check if they're properly formed
+      if (color.includes('gradient')) {
+        // Try to validate basic gradient structure
+        const hasOpenParen = color.includes('(')
+        const hasCloseParen = color.includes(')')
+        if (!hasOpenParen || !hasCloseParen) {
+          return '#ffffff'
+        }
+      }
+      
+      return color
+    }
+
+    // Use sanitized values only for the ColorPicker to prevent parsing errors
+    // But display the actual value in the preview box
+    const displayValue = value || '#ffffff'
+    const safePickerValue = sanitizeForPicker(tempColor)
+
     return (
       <div className="space-y-2">
         <Label className="text-sm font-medium text-gray-700">{label}</Label>
         <div className="relative">
           <div
             className="h-10 w-full rounded-lg border-2 border-gray-200 cursor-pointer hover:border-emerald-400 transition-colors"
-            style={{ background: value }}
+            style={{ background: displayValue }}
             onClick={() => {
-              setTempColor(value)
+              setTempColor(value || '#ffffff')
               setActiveColorPicker(isActive ? null : fieldKey)
             }}
           />
@@ -336,12 +411,16 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
                 style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <ColorPicker 
-                  value={tempColor} 
-                  onChange={handleColorChange}
-                  hideInputs={false}
-                />
-                <div className="flex gap-2 mt-3">
+                <div className="mb-3">
+                  <ColorPickerErrorBoundary>
+                    <ColorPicker 
+                      value={safePickerValue} 
+                      onChange={handleColorChange}
+                      hideInputs={false}
+                    />
+                  </ColorPickerErrorBoundary>
+                </div>
+                <div className="flex gap-2">
                   <Button
                     size="sm"
                     onClick={handleApply}
@@ -363,32 +442,47 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
           )}
         </div>
         <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="text-xs font-mono"
-          placeholder="CSS value"
+            value={value}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              onChange(newValue); // Always update, let preview/validation handle display
+            }}
+            className="text-xs font-mono"
+            placeholder="CSS value (hex, rgb, gradient, etc.)"
         />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 h-full">
       {/* Header */}
-      <div className="text-center space-y-3">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">
-          Customize Your Chatbot
-        </h2>
-        <p className="text-lg text-gray-600 max-w-xl mx-auto">
-          Design your perfect AI assistant with our intuitive customization tools
-        </p>
+      <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Chatbot Customization
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Configure your AI assistant's appearance and behavior
+          </p>
+        </div>
+
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          size="sm"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+        >
+          <Save className="w-4 h-4 mr-2" />
+          {isSaving ? 'Saving...' : 'Save'}
+        </Button>
       </div>
 
       {/* Main Content */}
-      <div className="flex gap-6">
+      <div className="flex gap-6 h-full">
         {/* Settings Panel - Left Side */}
         <div className="w-[420px] bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <div className="max-h-[600px] overflow-y-auto p-6 space-y-6">
+          <div className={`${propGenieId ? "h-full" : "max-h-[600px]"} overflow-y-auto p-6 space-y-6`}>
             {/* Theme Presets */}
             <div className="space-y-3">
               <Label className="text-base font-semibold text-gray-900">Quick Themes</Label>
@@ -681,7 +775,7 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
         </div>
 
         {/* Preview Panel - Right Side */}
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200 p-6">
+        <div className="flex-1 flex min-w-24 items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200 p-6">
           {/* <div className="w-full max-w-sm h-[600px] bg-white rounded-xl shadow-lg overflow-hidden"> */}
             <iframe
               src={buildPreviewUrl()}
@@ -694,25 +788,18 @@ export function CustomizeSection({ websiteData }: CustomizeSectionProps) {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-between items-center pt-6 border-t border-gray-200">
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-          variant="greenLight"
-          className="px-6 py-2"
-        >
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? 'Saving...' : 'Save Changes'}
-        </Button>
-        <Button
-          onClick={handleDeploy}
-          disabled={isDeploying}
-          className="px-8 py-2 bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900"
-        >
-          <Sparkles className="w-4 h-4 mr-2" />
-          {isDeploying ? 'Deploying...' : 'Deploy Chatbot'}
-        </Button>
-      </div>
+      {!propGenieId && (
+        <div className="flex justify-end pt-6 border-t border-gray-200">
+          <Button
+            onClick={handleDeploy}
+            disabled={isDeploying}
+            className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-700 hover:to-emerald-900"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            {isDeploying ? 'Deploying...' : 'Deploy Chatbot'}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

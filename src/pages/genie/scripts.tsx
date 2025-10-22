@@ -1,47 +1,35 @@
-import { Send, Bot, Eye } from 'lucide-react';
-import { Button } from '@/ui/components/Button';
-import { Input } from '@/ui/components/Input';
+import { Eye, Copy, Check, Code2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
+import { CustomizeSection } from '@/components/CustomizeSection';
+import { getCurrentGenieId } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export function GenieScripts() {
+  const genieId = getCurrentGenieId();
   const [previewUrl, setPreviewUrl] = useState('https://elanenterprises.in/');
   const [textareaValue] = useState('');
   const [_showChatbot, setShowChatbot] = useState(false);
   const [_isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState<Array<{id: string, role: 'user' | 'assistant', content: string}>>([]);
-  const [inputValue, setInputValue] = useState('');
-  const [activeView, setActiveView] = useState<'chat' | 'website' | 'preview'>('preview');
-  const [,] = useState({
-    botName: 'Support Bot',
-    botStatus: 'Always online',
-    headerBg: '#0d47a1',
-    headerText: '#ffffff',
-    botBubbleBg: '#e3f2fd',
-    botBubbleText: '#0d47a1',
-    userBubbleBg: 'linear-gradient(135deg, #43a047, #1b5e20)',
-    userBubbleText: '#ffffff',
-    bgFrom: '#e3f2fd',
-    bgTo: '#ede7f6',
-    chatBg: 'linear-gradient(135deg, #e3f2fd, #ede7f6)',
-    fontSize: '16px',
-    fontFamily: "'Segoe UI', Roboto, sans-serif",
-    botAvatar: 'https://i.pravatar.cc/150?img=1',
-    userAvatar: 'https://i.pravatar.cc/150?img=2',
-    inputBg: '#ffffff',
-    inputBorder: '1px solid #64b5f6',
-    inputText: '#212121',
-    inputPlaceholder: '#9e9e9e',
-    buttonBg: 'linear-gradient(135deg, #43a047, #1b5e20)',
-    buttonText: '#ffffff',
-    buttonShadow: '0px 2px 6px rgba(76, 175, 80, 0.3)',
-    buttonHover: 'linear-gradient(135deg, #388e3c, #2e7d32)',
-    borderRadius: '12px',
-    shadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-    welcomeMessage: 'Hi! How can I help you today?',
-    placeholder: 'Type your message...'
-  });
+  const [activeView, setActiveView] = useState<'chat' | 'website' | 'customize'>('customize');
+  const [copied, setCopied] = useState(false);
 
   const urlRegex = /(https?:\/\/[^\s]+)/g;
+  
+  const scriptCode = `<script src="https://ai-chat-widget-production.up.railway.app/chatbot.min.js?apiKey=${genieId}"></script>`;
+
+  const handleCopyScript = async () => {
+    try {
+      await navigator.clipboard.writeText(scriptCode);
+      setCopied(true);
+      toast.success('Script copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast.error('Failed to copy script');
+      console.error('Copy failed:', error);
+    }
+  };
 
   useEffect(() => {
     const urls = textareaValue.match(urlRegex);
@@ -52,36 +40,24 @@ export function GenieScripts() {
       setShowChatbot(false);
       setIsChatOpen(false);
     }
-  }, [textareaValue]);
+  }, [textareaValue, urlRegex]);
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
-    
-    const userMessage = {
-      id: Date.now().toString(),
-      role: 'user' as const,
-      content: inputValue
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
-    
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant' as const,
-        content: `I can help you with questions about ${previewUrl}. What would you like to know?`
-      };
-      setMessages(prev => [...prev, aiMessage]);
-    }, 1000);
-  };
+  if (!genieId) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">Scripts</h1>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+          <p className="text-yellow-800">No Genie ID found. Please select a genie from the dashboard first.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className='flex items-center justify-between'>
         <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">Scripts</h1>
-         {/* Chat/Website/Preview Toggle */}
+         {/* Chat/Website/Customize Toggle */}
         <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 w-fit">
           <button
             onClick={() => setActiveView('chat')}
@@ -104,80 +80,140 @@ export function GenieScripts() {
             Website
           </button>
           <button
-            onClick={() => setActiveView('preview')}
+            onClick={() => setActiveView('customize')}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-2 ${
-              activeView === 'preview'
+              activeView === 'customize'
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
             }`}
           >
             <Eye className="h-4 w-4" />
-            Preview
+            Customize
           </button>
         </div>
       </div>
       
-      <div className='bg-black h-[calc(100vh-11rem)] w-full '>
+      <div className=' h-[calc(100vh-11rem)] w-full '>
       
 
         {/* Content based on active view */}
-        {activeView === 'preview' ? (
-          <div className="h-full w-full ">
-            <iframe 
-              src="/chatbot-preview.html" 
-              className="w-full h-full border-0 rounded-lg"
-              title="Chatbot Widget Preview"
-            />
+        {activeView === 'customize' ? (
+          <div className="h-full w-full overflow-auto bg-white rounded-lg">
+            {genieId && <CustomizeSection websiteData={null} genieId={genieId} />}
           </div>
         ) : activeView === 'chat' ? (
-          <div className="bg-white rounded-lg border border-gray-200 h-full w-full flex flex-col">
-            {/* Chat Header */}
-            <div className="bg-emerald-600 text-white p-4 rounded-t-lg flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Bot className="h-6 w-6" />
+          <div className="flex flex-col h-full bg-white rounded-lg border border-gray-200">
+            {/* Header */}
+            <div className="border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-emerald-100/50 p-6">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center">
+                  <Code2 className="w-5 h-5 text-white" />
+                </div>
                 <div>
-                  <h3 className="font-semibold">Support Bot</h3>
-                  <p className="text-xs opacity-80">Always online</p>
+                  <h2 className="text-xl font-semibold text-gray-900">Widget Installation Script</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">Copy and paste this code into your website's HTML</p>
                 </div>
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-              {messages.length === 0 ? (
-                <div className="flex justify-start">
-                  <div className="bg-white border border-gray-200 rounded-lg p-3 max-w-xs">
-                    <p className="text-sm text-gray-700">Hi! How can I help you today?</p>
+            {/* Main Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Installation Steps */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-semibold flex-shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Copy the script below</h3>
+                    <p className="text-sm text-gray-600">This code snippet initializes your AI chatbot widget</p>
                   </div>
                 </div>
-              ) : (
-                messages.map((message) => (
-                  <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`rounded-lg p-3 max-w-xs ${
-                      message.role === 'user'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-white border border-gray-200 text-gray-700'
-                    }`}>
-                      <p className="text-sm">{message.content}</p>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-semibold flex-shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Paste before closing &lt;/body&gt; tag</h3>
+                    <p className="text-sm text-gray-600">Add the script just before the closing body tag in your HTML</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-semibold flex-shrink-0 mt-0.5">
+                    3
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Save and deploy</h3>
+                    <p className="text-sm text-gray-600">Your chatbot will automatically appear on your website</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Code Snippet */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700">Installation Script</Label>
+                <div className="relative group">
+                  <div className="bg-gray-900 rounded-lg p-4 border border-gray-700 overflow-x-auto">
+                    <code className="text-sm text-emerald-400 font-mono whitespace-pre">
+                      {scriptCode}
+                    </code>
+                  </div>
+                  <Button
+                    onClick={handleCopyScript}
+                    size="sm"
+                    className={`absolute top-3 right-3 transition-all ${
+                      copied 
+                        ? 'bg-green-600 hover:bg-green-700' 
+                        : 'bg-emerald-600 hover:bg-emerald-700'
+                    }`}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4 mr-1.5" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-1.5" />
+                        Copy Script
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Additional Information */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex gap-3">
+                  <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                    i
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-blue-900">Integration Tips</h4>
+                    <ul className="text-sm text-blue-800 space-y-1.5">
+                      <li>• The chatbot will automatically load when your page loads</li>
+                      <li>• It works on all modern browsers (Chrome, Firefox, Safari, Edge)</li>
+                      <li>• The widget is mobile-responsive and adapts to all screen sizes</li>
+                      <li>• Your customizations from the Customize tab are automatically applied</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* API Key Info */}
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Code2 className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Your API Key</h4>
+                    <p className="text-sm text-gray-600 mb-2">This unique identifier connects the widget to your chatbot</p>
+                    <div className="bg-white border border-gray-300 rounded px-3 py-2 font-mono text-sm text-gray-800 break-all">
+                      {genieId}
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-
-            {/* Input */}
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex space-x-2">
-                <Input
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Type your message..."
-                  className="flex-1"
-                />
-                <Button onClick={handleSendMessage} className="bg-emerald-600 hover:bg-emerald-700">
-                  <Send className="h-4 w-4" />
-                </Button>
+                </div>
               </div>
             </div>
           </div>

@@ -252,6 +252,21 @@ class ApiService {
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
   }
+
+  // Leads APIs
+  async getLeads(geniId: string, limit: number = 20, cursor?: string) {
+    const params = new URLSearchParams();
+    params.append('geniId', geniId);
+    params.append('status', 'ONLY_LEADS');
+    params.append('limit', limit.toString());
+    if (cursor) params.append('cursor', cursor);
+
+    const response = await fetch(`${API_BASE_URL}/leads?${params}`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    return this.handleResponse(response);
+  }
 }
 
 export const api = new ApiService();

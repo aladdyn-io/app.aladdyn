@@ -47,8 +47,11 @@ export function LeadTrack() {
 
       const response = await api.getLeads(geniId);
       
-      if (response.success && (response.data as any)?.leads) {
-        const leadsData = (response.data as any).leads as Lead[];
+      // Backend returns leads directly at root level or in data
+      const leadsArray = (response as any).leads || (response.data as any)?.leads;
+      
+      if (response.success && leadsArray) {
+        const leadsData = leadsArray as Lead[];
         setLeads(leadsData);
         
         // Calculate statistics

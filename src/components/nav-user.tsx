@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import {
   BellIcon,
   CreditCardIcon,
@@ -27,16 +28,83 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
+interface User {
+  name: string
+  email: string
+  avatar: string
+  userId?: string
+}
+
+export function NavUser() {
   const { isMobile } = useSidebar()
+  const [user, setUser] = useState<User>({
+    name: "",
+    email: "",
+    avatar: "",
+  })
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadUserFromStorage = () => {
+      try {
+        const storedUser = localStorage.getItem('user')
+        
+        if (storedUser) {
+          const userData = JSON.parse(storedUser)
+          setUser({
+            name: userData.name || "User",
+            email: userData.email || "user@example.com",
+            avatar: userData.avatar || "/avatars/user.jpg",
+            userId: userData.userId || ""
+          })
+        } else {
+          // Default user if no data in localStorage
+          setUser({
+            name: "User",
+            email: "user@example.com",
+            avatar: "/avatars/user.jpg",
+            userId: ""
+          })
+        }
+      } catch (error) {
+        console.error('Error loading user from localStorage:', error)
+        // Fallback to default user
+        setUser({
+          name: "User",
+          email: "user@example.com",
+          avatar: "/avatars/user.jpg",
+          userId: ""
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadUserFromStorage()
+  }, [])
+
+  const logout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    window.location.href = '/login'
+  }
+
+
+  if (isLoading) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" className="animate-pulse">
+            <div className="h-8 w-8 rounded-lg bg-gray-200"></div>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="h-4 bg-gray-200 rounded mb-1"></div>
+              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
 
   return (
     <SidebarMenu>
@@ -96,11 +164,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => {
-              localStorage.removeItem('token')
-              localStorage.removeItem('user')
-              window.location.href = '/login'
-            }}>
+            <DropdownMenuItem onClick={logout}>
               <LogOutIcon />
               Log out
             </DropdownMenuItem>

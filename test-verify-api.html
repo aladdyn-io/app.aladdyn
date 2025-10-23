@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Verify API</title>
+</head>
+<body>
+    <h1>Test Verify Token API</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testVerifyAPI() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Test with invalid token
+                console.log('Testing with invalid token...');
+                const invalidResponse = await fetch('http://localhost:3001/api/auth/verify-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer invalid-token'
+                    }
+                });
+                
+                const invalidData = await invalidResponse.json();
+                resultDiv.innerHTML += `
+                    <h3>Invalid Token Test:</h3>
+                    <p>Status: ${invalidResponse.status}</p>
+                    <p>Response: ${JSON.stringify(invalidData, null, 2)}</p>
+                `;
+                
+                // Test without token
+                console.log('Testing without token...');
+                const noTokenResponse = await fetch('http://localhost:3001/api/auth/verify-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const noTokenData = await noTokenResponse.json();
+                resultDiv.innerHTML += `
+                    <h3>No Token Test:</h3>
+                    <p>Status: ${noTokenResponse.status}</p>
+                    <p>Response: ${JSON.stringify(noTokenData, null, 2)}</p>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML += `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Run test when page loads
+        testVerifyAPI();
+    </script>
+</body>
+</html>

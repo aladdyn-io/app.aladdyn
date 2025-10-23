@@ -28,11 +28,23 @@ export function Register() {
       
       if (response.success && response.data) {
         // Store token and user data in localStorage
-        localStorage.setItem('token', (response.data as any).token)
+        const token = (response.data as any).token
+        localStorage.setItem('token', token)
+        
+        // Decode JWT to get userId (frontend safe method)
+        let userId = undefined;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          userId = payload.userId;
+        } catch (err) {
+          userId = undefined;
+        }
+        
         localStorage.setItem('user', JSON.stringify({
           name: (response.data as any).user?.name || name,
           email: (response.data as any).user?.email || email,
-          avatar: '/avatars/user.jpg'
+          avatar: '/avatars/user.jpg',
+          userId
         }))
         
         showRegisterSuccess((response.data as any).user?.name || name)

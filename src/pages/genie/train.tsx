@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/components/Card';
 import { Button } from '@/ui/components/Button';
 import { Input } from '@/ui/components/Input';
@@ -76,7 +76,44 @@ export function TrainGenie() {
   const [isDeletingDoc, setIsDeletingDoc] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string>('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  // Fetch documents and chunk stats when switching to documents section
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  // Upload button state
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleUploadFiles = async () => {
+    if (!selectedFiles.length) return;
+    setIsUploading(true);
+    setUploadError('');
+    const backendUrl = getBackendUrl();
+    const formData = new FormData();
+    selectedFiles.forEach((file) => {
+      formData.append('files', file);
+    });
+    try {
+      const response = await fetch(`${backendUrl}/api/genie/${genieId}/documents/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to upload files');
+      }
+      const result = await response.json();
+      if (result.success) {
+        toast.success(result.message || 'Files uploaded and processed.');
+        setSelectedFiles([]);
+        fetchDocuments();
+        fetchChunkStats();
+      } else {
+        throw new Error(result.message || 'Upload failed');
+      }
+    } catch (error: any) {
+      setUploadError(error.message || 'Upload failed');
+      toast.error(error.message || 'Upload failed');
+    } finally {
+      setIsUploading(false);
+    }
+  };
   useEffect(() => {
     if (genieId && activeSection === 'documents') {
       fetchDocuments();
@@ -601,11 +638,11 @@ export function TrainGenie() {
                   Only PDF and DOCX files allowed. Max size: 5MB per file.
                 </p>
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   multiple
                   style={{ display: 'none' }}
-                  id="file-upload-input"
                   onChange={(e) => {
                     setUploadError('');
                     const files = Array.from(e.target.files || []);
@@ -627,12 +664,10 @@ export function TrainGenie() {
                     setSelectedFiles(validFiles);
                   }}
                 />
-                <label htmlFor="file-upload-input">
-                  <Button variant="outline">
-                    <File className="w-4 h-4 mr-2" />
-                    Choose Files
-                  </Button>
-                </label>
+                <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                  <File className="w-4 h-4 mr-2" />
+                  Choose Files
+                </Button>
                 {uploadError && (
                   <div className="text-red-500 text-sm mt-2 font-medium">{uploadError}</div>
                 )}
@@ -644,6 +679,21 @@ export function TrainGenie() {
                         <li key={file.name}>{file.name} ({(file.size / 1024).toFixed(1)} KB)</li>
                       ))}
                     </ul>
+                    <Button
+                      className="mt-4 w-full"
+                      variant="primary"
+                      disabled={isUploading}
+                      onClick={handleUploadFiles}
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        'Upload'
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>

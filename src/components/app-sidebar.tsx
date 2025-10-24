@@ -155,23 +155,10 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate()
-  const [user, setUser] = useState({
-    name: "User",
-    email: "user@example.com",
-    avatar: "/avatars/user.jpg",
-  })
   const [subscription, setSubscription] = useState<any>(null)
   const [loadingSubscription, setLoadingSubscription] = useState(true)
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch {
-        // Keep default user
-      }
-    }
     
     // Fetch subscription
     fetchSubscription()

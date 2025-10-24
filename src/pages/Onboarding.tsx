@@ -104,6 +104,7 @@ export function Onboarding() {
   const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null)
   const [availableLinks, setAvailableLinks] = useState<string[]>([])
   const [streamMessages, setStreamMessages] = useState<string[]>([])
+  const [streamLogs, setStreamLogs] = useState<Array<{timestamp: string, type: string, message: string, data?: any}>>([])
   const [crawlStats, setCrawlStats] = useState<{ totalUrls: number; pagesCrawled: number; duration: number } | null>(null)
   const [adminPrompts, setAdminPrompts] = useState<AdminPrompt[]>([])
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
@@ -304,6 +305,7 @@ export function Onboarding() {
     // Reset state
     setScrapedLinks([])
     setStreamMessages([])
+    setStreamLogs([])
     setCrawlStats(null)
     setCurrentlyScraping(cleanUrl)
 
@@ -311,31 +313,28 @@ export function Onboarding() {
       description: 'This may take a few moments depending on the website size.'
     })
 
-    // Send genieName in POST body before starting SSE
-    await fetch(`${backendUrl}/api/onboarding`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        stage: 1,
-        userId,
-        url: cleanUrl,
-        type: 'onboarding',
-        genieName: genieName || 'Enterprise Genie',
-      }),
-    })
+    // Pass genieName directly to stream API
     const params = new URLSearchParams({
       userId,
       url: cleanUrl,
       type: 'onboarding',
-      maxPages: '100'
+      maxPages: '100',
+      genieName: genieName || 'Enterprise Genie'
     })
     const eventSource = new EventSource(`${backendUrl}/api/onboarding/stream?${params}`)
     return new Promise((resolve, reject) => {
       eventSource.onmessage = (event) => {
         try {
           const data: StreamEvent = JSON.parse(event.data)
+          
+          // Add to stream logs for live display
+          const logEntry = {
+            timestamp: data.timestamp || new Date().toISOString(),
+            type: data.type,
+            message: data.message || data.url || data.error || 'Event received',
+            data: data
+          }
+          setStreamLogs(prev => [...prev, logEntry])
           
           switch (data.type) {
             case 'start':
@@ -966,6 +965,47 @@ export function Onboarding() {
                             {streamMessages[streamMessages.length - 1]}
                           </p>
                         )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Live Stream Logs */}
+                  {streamLogs.length > 0 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                          Live Stream Log
+                        </h4>
+                        <span className="text-sm text-gray-500">
+                          {streamLogs.length} events
+                        </span>
+                      </div>
+                      
+                      <div className="bg-gray-900 rounded-lg p-4 max-h-96 overflow-y-auto">
+                        <div className="space-y-2 font-mono text-sm">
+                          {streamLogs.map((log, index) => (
+                            <div key={index} className="flex items-start gap-3 text-gray-300">
+                              <span className="text-gray-500 text-xs mt-0.5 min-w-[60px]">
+                                {new Date(log.timestamp).toLocaleTimeString()}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                log.type === 'start' ? 'bg-blue-600 text-white' :
+                                log.type === 'info' ? 'bg-blue-500 text-white' :
+                                log.type === 'url' ? 'bg-green-500 text-white' :
+                                log.type === 'complete' ? 'bg-green-600 text-white' :
+                                log.type === 'result' ? 'bg-purple-500 text-white' :
+                                log.type === 'error' ? 'bg-red-500 text-white' :
+                                'bg-gray-600 text-white'
+                              }`}>
+                                {log.type.toUpperCase()}
+                              </span>
+                              <span className="text-gray-200 flex-1">
+                                {log.message}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}

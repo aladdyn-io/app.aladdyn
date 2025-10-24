@@ -48,12 +48,6 @@ function App() {
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         
-        {/* Redirect onboarding to create */}
-        <Route
-          path="/onboarding/:genieId"
-          element={<RedirectOnboarding />}
-        />
-        
         {/* Onboarding pages without layout */}
         <Route path="/create-genie" element={<ProtectedRoute><CreateGenie /></ProtectedRoute>} />
         <Route path="/create" element={<Onboarding />} />

@@ -1,7 +1,6 @@
 
 import { Card, CardContent } from '@/ui/components/Card';
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
-import { DataTable } from "@/components/data-table"
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -17,13 +16,12 @@ import {
 } from "@/components/ui/card"
 import api from '@/services/api'
 
-import data from "@/data/dashboard-data.json"
 
 export function GenieDashboard() {
   const { genieId } = useParams<{ genieId?: string }>();
   const [stats, setStats] = useState<UmamiStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [genieName, setGenieName] = useState<string>('');
+  const [, setGenieName] = useState<string>('');
 
   useEffect(() => {
     if (genieId) {

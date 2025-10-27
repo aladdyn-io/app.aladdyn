@@ -19,11 +19,6 @@ interface AdminPrompt {
   }[];
 }
 
-interface CustomPrompt {
-  id: string;
-  value: string;
-  qualities: string[];
-}
 
 export function GeniePrompts() {
   const { genieId } = useParams<{ genieId?: string }>();

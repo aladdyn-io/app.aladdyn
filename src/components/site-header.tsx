@@ -10,7 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Home, ExternalLink } from "lucide-react"
+import { Home } from "lucide-react"
 import api from "@/services/api"
 
 const routeNames: Record<string, string> = {
@@ -42,8 +42,6 @@ export function SiteHeader() {
   const [userGenies, setUserGenies] = useState<any[]>([])
   const [otherGenies, setOtherGenies] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [teamSearchTerm, setTeamSearchTerm] = useState('')
-  const [projectSearchTerm, setProjectSearchTerm] = useState('')
   const [selectedTeam, setSelectedTeam] = useState('user-projects')
   const [userName, setUserName] = useState('User')
   const [genieName, setGenieName] = useState<string>('')

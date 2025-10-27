@@ -104,7 +104,6 @@ export function Create() {
   const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null)
   const [availableLinks, setAvailableLinks] = useState<string[]>([])
   const [streamMessages, setStreamMessages] = useState<string[]>([])
-  const [streamLogs, setStreamLogs] = useState<Array<{timestamp: string, type: string, message: string, data?: any}>>([])
   const [crawlStats, setCrawlStats] = useState<{ totalUrls: number; pagesCrawled: number; duration: number } | null>(null)
   const [adminPrompts, setAdminPrompts] = useState<AdminPrompt[]>([])
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false)
@@ -305,7 +304,6 @@ export function Create() {
     // Reset state
     setScrapedLinks([])
     setStreamMessages([])
-    setStreamLogs([])
     setCrawlStats(null)
     setCurrentlyScraping(cleanUrl)
 
@@ -328,13 +326,6 @@ export function Create() {
           const data: StreamEvent = JSON.parse(event.data)
           
           // Add to stream logs for live display
-          const logEntry = {
-            timestamp: data.timestamp || new Date().toISOString(),
-            type: data.type,
-            message: data.message || data.url || data.error || 'Event received',
-            data: data
-          }
-          setStreamLogs(prev => [...prev, logEntry])
           
           switch (data.type) {
             case 'start':

@@ -81,23 +81,6 @@ export function Dashboard() {
     }
   };
 
-  const getThumbnailImage = (genie: Genie) => {
-    const thumbnailMap: { [key: string]: string } = {
-      'Amazon': '/assets/amazon.png',
-      'Enterprises': '/assets/enterprises.png',
-      'Portfolio': '/assets/portfolio.png',
-      'Elan Enterprises': '/assets/portfolio.png',
-      'Nishaanth Portfolio': '/assets/portfolio.png'
-    };
-
-    const genieName = genie.name.toLowerCase();
-    for (const [key, imagePath] of Object.entries(thumbnailMap)) {
-      if (genieName.includes(key.toLowerCase())) {
-        return imagePath;
-      }
-    }
-    return null;
-  };
 
   if (loading) {
     return (
@@ -126,7 +109,6 @@ export function Dashboard() {
       {genies.length > 0 ? (
         <div className="space-y-4">
           {genies.map((genie) => {
-            const thumbnailImage = getThumbnailImage(genie);
             const cardHref = genie.status === 'training'
               ? `/create/${genie.id}`
               : `/genie/${genie.id}`;

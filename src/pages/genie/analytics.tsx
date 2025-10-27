@@ -15,7 +15,7 @@ export function GenieAnalytics() {
   const [stats, setStats] = useState<UmamiStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d' | '90d'>('7d');
-  const [genieName, setGenieName] = useState<string>('');
+  const [, setGenieName] = useState<string>('');
   const [eventsData, setEventsData] = useState<UmamiEventsResponse | null>(null);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

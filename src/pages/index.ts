@@ -2,7 +2,7 @@
 export { Home } from './Landing';
 export { Login } from './Login';
 export { Register } from './Register';
-export { Onboarding } from './Onboarding';
+export { Create } from './Create';
 export { Preview } from './Preview';
 export { Pricing } from './Pricing';
 export { default as Widget } from './Widget';
@@ -30,9 +30,8 @@ export {
   TrainGenie, 
   ChatLogs,
   GenieScripts,
+  GeniePrompts,
+  GenieCustomize,
   GenieSettings 
 } from './genie';
-
-// Create Genie
-export { CreateGenie } from './CreateGenie';
 

@@ -1,18 +1,19 @@
 import * as React from "react"
+import { useParams } from "react-router-dom"
 import {
   BarChartIcon,
   CameraIcon,
-  ClipboardListIcon,
   DatabaseIcon,
   FileCodeIcon,
-  FileIcon,
-  FolderIcon,
   HelpCircleIcon,
   LayoutDashboardIcon,
   ListIcon,
   SearchIcon,
   SettingsIcon,
   UsersIcon,
+  Palette,
+  MessageSquareText,
+  PlayCircle,
 } from "lucide-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -29,101 +30,78 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/genie",
-      icon: LayoutDashboardIcon,
-    },
-    {
-      title: "Analytics",
-      url: "/genie/analytics",
-      icon: BarChartIcon,
-    },
-    {
-      title: "Playground",
-      url: "/genie/playground",
-      icon: FolderIcon,
-    },
-    {
-      title: "Leads",
-      url: "/genie/leads",
-      icon: UsersIcon,
-    },
-    {
-      title: "Chat Logs",
-      url: "/genie/chatlogs",
-      icon: ListIcon,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Train",
-      icon: CameraIcon,
-      isActive: true,
-      url: "/genie/train",
-      items: [
-        {
-          title: "Training Data",
-          url: "/genie/train",
-        },
-      ],
-    },
-    {
-      title: "Scripts",
-      icon: FileCodeIcon,
-      url: "/genie/scripts",
-      items: [
-        {
-          title: "Active Scripts",
-          url: "/genie/scripts",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/genie/settings",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Get Help",
-      url: "/about",
-      icon: HelpCircleIcon,
-    },
-    {
-      title: "Search",
-      url: "/genie",
-      icon: SearchIcon,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "/genie/train",
-      icon: DatabaseIcon,
-    },
-    {
-      name: "Reports",
-      url: "/genie/analytics",
-      icon: ClipboardListIcon,
-    },
-    {
-      name: "Scripts",
-      url: "/genie/scripts",
-      icon: FileIcon,
-    },
-  ],
-}
-
 export function GenieSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { genieId } = useParams<{ genieId?: string }>();
+  
+  const data = {
+    navMain: [
+      {
+        title: "Dashboard",
+        url: `/genie/${genieId || ''}`,
+        icon: LayoutDashboardIcon,
+      },
+      {
+        title: "Analytics",
+        url: `/genie/${genieId || ''}/analytics`,
+        icon: BarChartIcon,
+      },
+      {
+        title: "Playground",
+        url: `/genie/${genieId || ''}/playground`,
+        icon: PlayCircle,
+      },
+      {
+        title: "Leads",
+        url: `/genie/${genieId || ''}/leads`,
+        icon: UsersIcon,
+      },
+      {
+        title: "Chat Logs",
+        url: `/genie/${genieId || ''}/chatlogs`,
+        icon: ListIcon,
+      },
+    ],
+    navSecondary: [
+      {
+        title: "Settings",
+        url: `/genie/${genieId || ''}/settings`,
+        icon: SettingsIcon,
+      },
+      {
+        title: "Get Help",
+        url: "/about",
+        icon: HelpCircleIcon,
+      },
+      {
+        title: "Search",
+        url: `/genie/${genieId || ''}`,
+        icon: SearchIcon,
+      },
+    ],
+    documents: [
+      {
+        name: "Train",
+        url: `/genie/${genieId || ''}/train`,
+        icon: DatabaseIcon,
+      },
+      {
+        name: "Scripts",
+        url: `/genie/${genieId || ''}/scripts`,
+        icon: FileCodeIcon,
+      },
+      {
+        name: "Prompts",
+        url: `/genie/${genieId || ''}/prompts`,
+        icon: MessageSquareText,
+      },
+      {
+        name: "Customize",
+        url: `/genie/${genieId || ''}/customize`,
+        icon: Palette,
+      },
+    ],
+  };
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -133,7 +111,7 @@ export function GenieSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="/genie">
+              <a href="/">
                 <img className="h-7 w-7 " src="/gene.png" alt="genie" />
                 <span className="text-xl font-semibold">Genie</span>
               </a>

@@ -146,6 +146,14 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  async getGenieDetails(genieId: string) {
+    const response = await fetch(`${API_BASE_URL}/genies/${genieId}/details`, {
+      headers: this.getAuthHeaders(),
+    });
+    
+    return this.handleResponse(response);
+  }
+
   // Chatlogs APIs
   async getConversations(
     geniId: string,

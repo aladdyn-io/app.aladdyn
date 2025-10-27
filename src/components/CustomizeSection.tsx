@@ -205,6 +205,41 @@ export function CustomizeSection({ websiteData, genieId: propGenieId }: Customiz
   const [isDeploying, setIsDeploying] = useState(false)
   const [activeColorPicker, setActiveColorPicker] = useState<string | null>(null)
 
+  // Load existing styling on mount
+  useEffect(() => {
+    if (genieId) {
+      fetchExistingStyling();
+    }
+  }, [genieId]);
+
+  const fetchExistingStyling = async () => {
+    if (!genieId) return;
+    
+    const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+    const token = localStorage.getItem('token');
+    
+    try {
+      const response = await fetch(`${backendUrl}/genies/${genieId}/styling`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data && data.data.styles) {
+          // Merge fetched styles with defaults to ensure all properties exist
+          setStyles({
+            ...DEFAULT_THEMES.professional.styles,
+            ...data.data.styles,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch existing styling:', error);
+    }
+  };
+
   const getBackendUrl = () => {
     return import.meta.env.VITE_GENIE_BACKEND_URL
   }
@@ -276,6 +311,7 @@ export function CustomizeSection({ websiteData, genieId: propGenieId }: Customiz
       await handleSave()
 
       // Then deploy the chatbot
+      const userId = websiteData?.website_id || localStorage.getItem('userId') || ''
       const response = await fetch(`${backendUrl}/api/onboarding/create-chatbot`, {
         method: 'POST',
         headers: {
@@ -284,6 +320,7 @@ export function CustomizeSection({ websiteData, genieId: propGenieId }: Customiz
         body: JSON.stringify({
           stage: 5,
           genieId: genieId,
+          userId: userId,
         }),
       })
 
@@ -455,34 +492,12 @@ export function CustomizeSection({ websiteData, genieId: propGenieId }: Customiz
   }
 
   return (
-    <div className="space-y-6 h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Chatbot Customization
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Configure your AI assistant's appearance and behavior
-          </p>
-        </div>
-
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-          size="sm"
-          className="bg-emerald-600 hover:bg-emerald-700 text-white"
-        >
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? 'Saving...' : 'Save'}
-        </Button>
-      </div>
-
+    <div className="h-full">
       {/* Main Content */}
-      <div className="flex gap-6 h-full">
+      <div className="flex gap-6 h-full relative">
         {/* Settings Panel - Left Side */}
-        <div className="w-[420px] bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <div className={`${propGenieId ? "h-full" : "max-h-[600px]"} overflow-y-auto p-6 space-y-6`}>
+        <div className="w-[420px] bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col">
+          <div className={`${propGenieId ? "flex-1" : "max-h-[600px]"} overflow-y-auto p-6 space-y-6`}>
             {/* Theme Presets */}
             <div className="space-y-3">
               <Label className="text-base font-semibold text-gray-900">Quick Themes</Label>
@@ -771,7 +786,22 @@ export function CustomizeSection({ websiteData, genieId: propGenieId }: Customiz
                 </div>
               </TabsContent>
             </Tabs>
+            
           </div>
+          
+          {/* Save Button - At bottom of settings panel */}
+          {propGenieId && (
+            <div className="bg-white border-t border-gray-200 p-4">
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Preview Panel - Right Side */}

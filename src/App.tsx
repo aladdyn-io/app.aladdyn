@@ -9,7 +9,7 @@ import {
   Settings,
   Login,
   Register,
-  Onboarding,
+  Create,
   Preview,
   Pricing,
   GenieDashboard,
@@ -18,13 +18,14 @@ import {
   LeadTrack,
   TrainGenie,
   GenieScripts,
+  GeniePrompts,
+  GenieCustomize,
   GenieSettings,
   ChatLogs,
   Widget,
   DashboardV2,
   HomeLayout,
   GenieLayout,
-  CreateGenie,
 } from '@/pages';
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -40,10 +41,9 @@ function App() {
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         
-        {/* Onboarding pages without layout */}
-        <Route path="/create-genie" element={<ProtectedRoute><CreateGenie /></ProtectedRoute>} />
-        <Route path="/create" element={<Onboarding />} />
-        <Route path="/create/:genieId" element={<Onboarding />} />
+        {/* Create pages without layout */}
+        <Route path="/create" element={<Create />} />
+        <Route path="/create/:genieId" element={<Create />} />
         
         {/* Protected pages without layout */}
         <Route path="/preview/:url" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
@@ -64,9 +64,8 @@ function App() {
         </Route>
         
         {/* Protected Genie pages */}
-        <Route path="/genie" element={<ProtectedRoute><GenieLayout /></ProtectedRoute>}>
+        <Route path="/genie/:genieId" element={<ProtectedRoute><GenieLayout /></ProtectedRoute>}>
           <Route index element={<GenieDashboard />} />
-          <Route path=":genieId" element={<GenieDashboard />} />
           <Route path="analytics" element={<GenieAnalytics />} />
           <Route path="playground" element={<GeniePlayground />} />
           <Route path="leads" element={<LeadTrack />} />
@@ -76,6 +75,8 @@ function App() {
           <Route path="chatlogs" element={<ChatLogs />} />
           <Route path="train" element={<TrainGenie />} />
           <Route path="scripts" element={<GenieScripts />} />
+          <Route path="prompts" element={<GeniePrompts />} />
+          <Route path="customize" element={<GenieCustomize />} />
           <Route path="settings" element={<GenieSettings />} />
         </Route>
         

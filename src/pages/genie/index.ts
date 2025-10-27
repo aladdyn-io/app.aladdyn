@@ -5,6 +5,8 @@ export { GeniePlayground } from './playground';
 export { LeadTrack } from './leads';
 export { TrainGenie } from './train';
 export { GenieScripts } from './scripts';
+export { GeniePrompts } from './prompts';
+export { GenieCustomize } from './customize';
 export { GenieSettings } from './settings';
 export { ChatLogs } from './chatlogs';
 

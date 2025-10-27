@@ -2,17 +2,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/components/Tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from '@/ui/components';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { umamiService } from '@/services/umami';
 import type { UmamiStats, UmamiEventsResponse, UmamiSessionsResponse } from '@/services/umami';
 import { Activity, Users, Eye, TrendingUp, Globe, Monitor, Smartphone, RefreshCw, Chrome, Apple, TabletSmartphone } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
+import api from '@/services/api';
 
 export function GenieAnalytics() {
+  const { genieId } = useParams<{ genieId?: string }>();
   const [stats, setStats] = useState<UmamiStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d' | '90d'>('7d');
-  const [genieId, setGenieId] = useState<string | null>(null);
+  const [genieName, setGenieName] = useState<string>('');
   const [eventsData, setEventsData] = useState<UmamiEventsResponse | null>(null);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,16 +23,26 @@ export function GenieAnalytics() {
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const [sessionSearchTerm, setSessionSearchTerm] = useState('');
 
-  // Get genieId from localStorage
+  // Get genieId from URL params and fetch genie details
   useEffect(() => {
-    const storedGenieId = localStorage.getItem('currentGenieId');
-    if (storedGenieId) {
-      setGenieId(storedGenieId);
-    } else {
-      toast.error('No genie ID found in localStorage');
-      setLoading(false);
+    if (genieId) {
+      fetchGenieDetails();
     }
-  }, []);
+  }, [genieId]);
+
+  const fetchGenieDetails = async () => {
+    if (!genieId) return;
+
+    try {
+      const response = await api.getGenieDetails(genieId);
+      if (response.success && response.data) {
+        setGenieName((response.data as any).name);
+      }
+    } catch (error) {
+      console.error('Failed to fetch genie details:', error);
+      toast.error('Failed to load genie details');
+    }
+  };
 
   const fetchAnalytics = async () => {
     if (!genieId) {
@@ -135,13 +148,13 @@ export function GenieAnalytics() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
+      <div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent">
             Analytics Dashboard
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Comprehensive analytics powered by Umami for your Genie performance metrics.
-          </p>
+        <p className="mt-1 text-sm text-gray-500">
+          Comprehensive analytics powered by Umami for your Genie performance metrics.
+        </p>
         </div>
         <div className="flex gap-2">
           <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
@@ -184,13 +197,13 @@ variant={timeRange === range ? 'primary' : 'ghost'}
       ) : stats ? (
         <>
           {/* Tabs */}
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="events">Events</TabsTrigger>
-              <TabsTrigger value="sessions">Sessions</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-            </TabsList>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
+          <TabsTrigger value="sessions">Sessions</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
+        </TabsList>
 
             <TabsContent value="overview" className="space-y-6 mt-6">
               {/* Metrics Bar - Umami Style (Top KPIs) */}
@@ -849,7 +862,7 @@ variant={timeRange === range ? 'primary' : 'ghost'}
                         )}
                       </CardContent>
                     </Card>
-                  </TabsContent>
+        </TabsContent>
 
                   <TabsContent value="properties" className="mt-4">
                     <Card>
@@ -860,7 +873,7 @@ variant={timeRange === range ? 'primary' : 'ghost'}
                   </TabsContent>
                 </Tabs>
               </div>
-            </TabsContent>
+        </TabsContent>
 
             <TabsContent value="sessions" className="space-y-6 mt-6">
               {/* Sessions Metrics Bar */}
@@ -1104,7 +1117,7 @@ variant={timeRange === range ? 'primary' : 'ghost'}
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+        </TabsContent>
 
             <TabsContent value="reports" className="space-y-6 mt-6">
               {/* Reports Summary */}
@@ -1319,8 +1332,8 @@ variant={timeRange === range ? 'primary' : 'ghost'}
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+        </TabsContent>
+      </Tabs>
         </>
       ) : (
         <div className="flex items-center justify-center h-64">

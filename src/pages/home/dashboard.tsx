@@ -4,6 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import api from '@/services/api';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { MoreVertical, Edit, Trash2, ExternalLink, Settings, Copy } from 'lucide-react';
 
 interface Genie {
   id: string;
@@ -105,11 +113,11 @@ export function Dashboard() {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-2">
           {isOtherRoute ? 'Collaboration Projects' : 'Your Genie Projects'}
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-500 text-sm">
           {isOtherRoute ? 'Projects shared with you' : 'Manage your AI genie projects'}
         </p>
       </div>
@@ -121,67 +129,137 @@ export function Dashboard() {
             const thumbnailImage = getThumbnailImage(genie);
             const cardHref = genie.status === 'training'
               ? `/create/${genie.id}`
-              : `/genie/${genie.websiteId || genie.id}`;
+              : `/genie/${genie.id}`;
             return (
               // List View
               <Card 
                 key={genie.id} 
-                className="py-4  transition-all duration-200 cursor-pointer shadow-none"
-                onClick={() => {
-                  // Store the selected genie ID in localStorage
-                  localStorage.setItem('currentGenieId', genie.id);
-                  window.location.href = cardHref;
-                }}
+                className="group transition-all duration-300 border-2 border-gray-100 hover:border-emerald-400 bg-gradient-to-r from-white to-gray-50/50 hover:from-emerald-50/30 hover:to-white "
               >
-                <CardContent className="px-6">
+                <CardContent className="px-5 py-0">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1">
-                      {thumbnailImage ? (
-                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shadow-sm">
+                    <div 
+                      className="flex items-center space-x-4 flex-1 cursor-pointer"
+                      onClick={() => {
+                        window.location.href = cardHref;
+                      }}
+                    >
+                      {/* Website Favicon */}
+                      <div className="relative">
+                        <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 flex items-center justify-center p-2 group-hover:border-emerald-400 transition-all">
+                        {genie.websiteUrl ? (
                           <img 
-                            src={thumbnailImage} 
+                            src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${genie.websiteUrl}&size=64`}
                             alt={genie.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
                               const parent = target.parentElement;
                               if (parent) {
-                                parent.innerHTML = `<div class="text-3xl flex items-center justify-center h-full">${genie.icon}</div>`;
+                                parent.innerHTML = `<div class="text-2xl flex items-center justify-center h-full">${genie.icon}</div>`;
                               }
                             }}
                           />
+                        ) : (
+                          <div className="text-2xl">{genie.icon}</div>
+                        )}
                         </div>
-                      ) : (
-                        <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center shadow-sm">
-                          <div className="text-3xl">{genie.icon}</div>
-                        </div>
-                      )}
+                      </div>
                       
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-lg mb-1">{genie.name}</h3>
-                        <p className="text-sm text-gray-500 capitalize mb-2">{genie.type} • {genie.website_type}</p>
+                        <h3 className="font-bold text-gray-900 text-lg mb-1 group-hover:text-emerald-600 transition-colors">
+                          {genie.name} <span className="text-xs text-gray-500 capitalize font-normal bg-gray-100 px-2 py-1 rounded-md mx-2"> {genie.website_type}</span>
+                        </h3>
+                        
                         {genie.websiteUrl && (
                           <a 
                             href={genie.websiteUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className=" text-sm text-blue-600 hover:text-blue-800 hover:underline block truncate w-fit"
+                            className="text-sm text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center gap-1.5 font-medium"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {genie.websiteUrl} 
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span className="truncate max-w-md">{genie.websiteUrl}</span>
                           </a>
                         )}
                         {isOtherRoute && genie.owner && (
-                          <p className="text-xs text-gray-400 mt-1">Owner: {genie.owner.name}</p>
+                          <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                            <span className="font-medium">Owner:</span> {genie.owner.name}
+                          </p>
                         )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center ml-4">
-                      <Badge className={`${getStatusColor(genie.status)} px-3 py-1`}>
+                    <div className="flex items-center gap-3 ml-4">
+                      <Badge className={`${getStatusColor(genie.status)} px-4 py-1.5 text-xs font-semibold uppercase tracking-wide`}>
                         {genie.status}
                       </Badge>
+                      
+                      {/* Three-dot menu */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button 
+                            className="p-2 hover:bg-gray-100 rounded-md transition-all"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical className="w-5 h-5 text-gray-500" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.location.href = cardHref;
+                            }}
+                          >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Open Project
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.location.href = `/genie/${genie.id}/settings`;
+                            }}
+                          >
+                            <Settings className="w-4 h-4 mr-2" />
+                            Settings
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(genie.id);
+                              toast.success('Genie ID copied to clipboard');
+                            }}
+                          >
+                            <Copy className="w-4 h-4 mr-2" />
+                            Copy ID
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.location.href = `/create/${genie.id}`;
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm('Are you sure you want to delete this genie?')) {
+                                toast.info('Delete functionality coming soon');
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </CardContent>
@@ -191,10 +269,8 @@ export function Dashboard() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-            <div className="text-2xl text-gray-400">
-              🤖
-            </div>
+          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl flex items-center justify-center shadow-lg p-3">
+            <img src="/gene.png" alt="Aladdyn" className="w-full h-full object-contain" />
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             {isOtherRoute ? 'No Collaboration Projects Yet' : 'No Genie Projects Yet'}

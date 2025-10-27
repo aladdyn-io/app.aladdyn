@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { OnboardingNavbar } from '@/components/OnboardingNavbar'
+import { CreateNavbar } from '@/components/CreateNavbar'
 import { CustomizeSection } from '@/components/CustomizeSection'
 import { Button, Card, CardTitle, CardDescription, CardContent, Input, Label } from '@/ui/components'
 import { toast } from 'sonner'
@@ -84,7 +84,7 @@ interface AdminPrompt {
   }[]
 }
 
-export function Onboarding() {
+export function Create() {
   const { genieId } = useParams<{ genieId?: string }>()
   
   useEffect(() => {
@@ -695,7 +695,7 @@ export function Onboarding() {
 
   return (
     <div className="min-h-screen bg-white">
-      <OnboardingNavbar />
+      <CreateNavbar />
 
 
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">

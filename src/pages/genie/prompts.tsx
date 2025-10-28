@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Plus, X, Save, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MessageSquare, Plus, X, Save, Loader2, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { getUserId } from '@/lib/utils';
 
@@ -22,6 +23,7 @@ interface AdminPrompt {
 
 export function GeniePrompts() {
   const { genieId } = useParams<{ genieId?: string }>();
+  const [endGoal, setEndGoal] = useState<string>('all');
   const [adminPrompts, setAdminPrompts] = useState<AdminPrompt[]>([]);
   const [customPrompt, setCustomPrompt] = useState('');
   const [customQualities, setCustomQualities] = useState<string[]>([]);
@@ -214,6 +216,55 @@ export function GeniePrompts() {
           <p className="text-sm text-gray-600">Configure your AI assistant's behavior and personality</p>
         </div>
       </div>
+
+      {/* End Goal Selection */}
+      <Card className="border-2 border-blue-200 bg-blue-50">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <Target className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-lg">End Goal</CardTitle>
+              <CardDescription className="mt-1">
+                Select the primary objective for your chatbot
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="end-goal" className="text-sm font-medium text-gray-900">
+              What should your chatbot achieve?
+            </Label>
+            <Select value={endGoal} onValueChange={setEndGoal}>
+              <SelectTrigger id="end-goal" className="bg-white">
+                <SelectValue placeholder="Select end goal" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All (Schedule Meet + Collect Lead)</SelectItem>
+                <SelectItem value="schedule-meet">Schedule Meet</SelectItem>
+                <SelectItem value="collect-lead">Collect Lead</SelectItem>
+              </SelectContent>
+            </Select>
+            {endGoal === 'schedule-meet' && (
+              <p className="text-xs text-blue-700 mt-2">
+                📅 Focus on booking meetings and appointments with visitors
+              </p>
+            )}
+            {endGoal === 'collect-lead' && (
+              <p className="text-xs text-blue-700 mt-2">
+                📝 Focus on capturing visitor contact information and inquiries
+              </p>
+            )}
+            {endGoal === 'all' && (
+              <p className="text-xs text-blue-700 mt-2">
+                🎯 Comprehensive approach: Schedule meetings and collect leads
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Current Prompt Display */}
       {currentPrompt && (

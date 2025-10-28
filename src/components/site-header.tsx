@@ -301,14 +301,6 @@ export function SiteHeader() {
                 </BreadcrumbItem>
               </>
             )}
-            {currentPath.startsWith('/genie') && currentPath !== '/genie' && (
-              <>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{currentPageName}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </>
-            )}
           </BreadcrumbList>
         </Breadcrumb>
       </div>

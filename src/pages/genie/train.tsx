@@ -482,7 +482,7 @@ export function TrainGenie() {
                       onKeyDown={(e) => e.key === 'Enter' && handleAddUrl()}
                       className="flex-1"
                     />
-                    <Button onClick={handleAddUrl} size="sm">
+                    <Button onClick={handleAddUrl} size="sm" className="flex items-center justify-center">
                       <Plus className="w-4 h-4 mr-1" />
                       Add
                     </Button>

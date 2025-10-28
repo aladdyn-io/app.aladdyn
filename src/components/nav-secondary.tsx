@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useLocation } from "react-router-dom"
 import type { LucideIcon } from "lucide-react"
 
 import {
@@ -21,20 +22,29 @@ export function NavSecondary({
     icon: LucideIcon
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const location = useLocation()
+
+  const isActive = (url: string) => {
+    return location.pathname === url || location.pathname.startsWith(url + '/')
+  }
+
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <a href={item.url}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            const active = isActive(item.url)
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild className={active ? "bg-blue-100 text-blue-900 font-semibold hover:bg-blue-100" : ""}>
+                  <a href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

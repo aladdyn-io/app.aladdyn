@@ -20,6 +20,7 @@ import {
   GenieScripts,
   GeniePrompts,
   GenieCustomize,
+  GenieIntegrations,
   GenieSettings,
   ChatLogs,
   Widget,
@@ -77,6 +78,7 @@ function App() {
           <Route path="scripts" element={<GenieScripts />} />
           <Route path="prompts" element={<GeniePrompts />} />
           <Route path="customize" element={<GenieCustomize />} />
+          <Route path="integrations" element={<GenieIntegrations />} />
           <Route path="settings" element={<GenieSettings />} />
         </Route>
         

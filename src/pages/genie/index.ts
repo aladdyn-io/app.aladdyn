@@ -7,6 +7,7 @@ export { TrainGenie } from './train';
 export { GenieScripts } from './scripts';
 export { GeniePrompts } from './prompts';
 export { GenieCustomize } from './customize';
+export { GenieIntegrations } from './integrations';
 export { GenieSettings } from './settings';
 export { ChatLogs } from './chatlogs';
 

@@ -32,6 +32,7 @@ export {
   GenieScripts,
   GeniePrompts,
   GenieCustomize,
+  GenieIntegrations,
   GenieSettings 
 } from './genie';
 

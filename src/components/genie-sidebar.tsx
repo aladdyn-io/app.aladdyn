@@ -7,12 +7,12 @@ import {
   HelpCircleIcon,
   LayoutDashboardIcon,
   ListIcon,
-  SearchIcon,
   SettingsIcon,
   UsersIcon,
   Palette,
   MessageSquareText,
   PlayCircle,
+  Plug2,
 } from "lucide-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -71,11 +71,6 @@ export function GenieSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         url: "/about",
         icon: HelpCircleIcon,
       },
-      {
-        title: "Search",
-        url: `/genie/${genieId || ''}`,
-        icon: SearchIcon,
-      },
     ],
     documents: [
       {
@@ -98,6 +93,12 @@ export function GenieSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         url: `/genie/${genieId || ''}/customize`,
         icon: Palette,
       },
+      {
+        name: "Integrations",
+        url: `/genie/${genieId || ''}/integrations`,
+        icon: Plug2,
+        badge: "4 left",
+      },
     ],
   };
 
@@ -119,7 +120,7 @@ export function GenieSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain} showActions={false} />
         <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

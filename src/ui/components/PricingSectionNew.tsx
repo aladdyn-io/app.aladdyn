@@ -1,10 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check } from "lucide-react"
+import { toast } from "sonner"
+import { useRazorpayCheckout } from "@/components/RazorpayCheckout"
 
 interface PricingPlan {
   id: string;
@@ -29,10 +32,25 @@ interface PricingPlan {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function PricingSectionNew() {
+  const navigate = useNavigate()
   const [isYearly, setIsYearly] = useState(false)
   const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
+
+  const { initiatePayment } = useRazorpayCheckout({
+    planId: selectedPlan?.id || '',
+    planName: selectedPlan?.displayName || '',
+    onSuccess: () => {
+      toast.success('Subscription activated successfully!')
+      navigate('/')
+    },
+    onError: (error) => {
+      console.error('Payment error:', error)
+      toast.error('Payment failed. Please try again.')
+    },
+  })
 
   useEffect(() => {
     fetchPricingPlans()
@@ -161,7 +179,59 @@ export function PricingSectionNew() {
     if (plan.price === -1) {
       return 'Contact'
     }
+    if (plan.price === 0) {
+      return 'Free'
+    }
     return `₹${plan.price.toLocaleString('en-IN')}`
+  }
+
+  const handlePlanSelect = async (plan: PricingPlan) => {
+    const token = localStorage.getItem('token')
+    
+    // Check if user is logged in
+    if (!token) {
+      toast.error('Please login to subscribe')
+      navigate('/login')
+      return
+    }
+
+    // Handle free plan
+    if (plan.price === 0) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/subscriptions/free`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        })
+        const data = await response.json()
+        
+        if (data.success) {
+          toast.success('Successfully subscribed to free plan!')
+          navigate('/')
+        } else {
+          toast.error(data.error || 'Failed to subscribe to free plan')
+        }
+      } catch (error) {
+        toast.error('Failed to subscribe to free plan')
+      }
+      return
+    }
+
+    // Handle enterprise plan (contact sales)
+    if (plan.name === 'enterprise' || plan.price === -1) {
+      toast.info('Please contact us for enterprise pricing')
+      window.location.href = 'mailto:sales@aladdyn.ai?subject=Enterprise Plan Inquiry'
+      return
+    }
+
+    // Handle paid plans - initiate Razorpay checkout
+    setSelectedPlan(plan)
+    // Pass plan ID and name directly to avoid timing issues
+    setTimeout(() => {
+      initiatePayment(plan.id, plan.displayName)
+    }, 100)
   }
 
   if (loading) {
@@ -341,17 +411,9 @@ export function PricingSectionNew() {
                   variant={baseName === 'pro' ? "default" : "outline"}
                   size="lg"
                   aria-label={`Get started with ${plan.displayName} plan for ${getDisplayPrice(plan)} per ${plan.interval}`}
-                  onClick={() => {
-                    if (plan.price === -1) {
-                      // Handle Enterprise contact
-                      window.location.href = 'mailto:sales@example.com?subject=Enterprise Plan Inquiry'
-                    } else {
-                      // Handle other plans
-                      console.log('Selected plan:', plan.name)
-                    }
-                  }}
+                  onClick={() => handlePlanSelect(plan)}
                 >
-                  {plan.price === -1 ? 'Contact Sales' : 'Get Started'}
+                  {plan.price === -1 ? 'Contact Sales' : plan.price === 0 ? 'Start Free' : 'Get Started'}
                 </Button>
               </CardFooter>
             </Card>

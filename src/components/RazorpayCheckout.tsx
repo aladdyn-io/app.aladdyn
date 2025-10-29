@@ -53,15 +53,23 @@ export function useRazorpayCheckout({
     };
   }, []);
 
-  const initiatePayment = async () => {
+  const initiatePayment = async (customPlanId?: string, customPlanName?: string) => {
     try {
       if (!window.Razorpay) {
         toast.error('Payment gateway not loaded. Please refresh and try again.');
         return;
       }
 
+      const paymentPlanId = customPlanId || planId;
+      const paymentPlanName = customPlanName || planName;
+
+      if (!paymentPlanId) {
+        toast.error('Please select a plan first');
+        return;
+      }
+
       // Create order
-      const orderResponse = await api.createPaymentOrder(planId);
+      const orderResponse = await api.createPaymentOrder(paymentPlanId);
       
       if (!orderResponse.success || !orderResponse.data) {
         throw new Error('Failed to create payment order');
@@ -80,7 +88,7 @@ export function useRazorpayCheckout({
         currency: currency,
         order_id: orderId,
         name: 'Aladdyn AI',
-        description: `Subscription to ${planName}`,
+        description: `Subscription to ${paymentPlanName}`,
         image: '/gene.png', // Your logo
         handler: async function (response: any) {
           try {
@@ -89,7 +97,7 @@ export function useRazorpayCheckout({
               response.razorpay_order_id,
               response.razorpay_payment_id,
               response.razorpay_signature,
-              planId
+              paymentPlanId
             );
 
             if (verifyResponse.success && verifyResponse.data) {

@@ -280,22 +280,38 @@ export function PricingSectionNew() {
                    'Enterprise solutions'}
                 </CardDescription>
                 <div className="mt-4" id={`plan-${index}-price`}>
-                  <span
-                    className="text-4xl font-bold"
-                    aria-label={`${getDisplayPrice(plan)} per ${plan.interval === 'yearly' ? 'year' : plan.interval}`}
-                  >
-                    {getDisplayPrice(plan)}
-                  </span>
-                  {plan.price !== -1 && (
-                    <span className="text-muted-foreground" aria-hidden="true">
-                      /{plan.interval === 'yearly' ? 'year' : plan.interval}
-                    </span>
+                  {isYearlyPlan && plan.price > 0 ? (
+                    // Show monthly equivalent for yearly plans
+                    <>
+                      <div className="text-4xl font-bold">
+                        ₹{Math.round(plan.price / 12).toLocaleString('en-IN')}
+                        <span className="text-muted-foreground text-lg">/month</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Billed annually at ₹{plan.price.toLocaleString('en-IN')}
+                      </div>
+                    </>
+                  ) : (
+                    // Show regular price for monthly plans
+                    <>
+                      <span
+                        className="text-4xl font-bold"
+                        aria-label={`${getDisplayPrice(plan)} per ${plan.interval === 'yearly' ? 'year' : plan.interval}`}
+                      >
+                        {getDisplayPrice(plan)}
+                      </span>
+                      {plan.price !== -1 && (
+                        <span className="text-muted-foreground" aria-hidden="true">
+                          /{plan.interval === 'yearly' ? 'year' : plan.interval}
+                        </span>
+                      )}
+                    </>
                   )}
                   
                   {/* Show yearly savings */}
                   {savingsInfo && (
                     <div
-                      className="text-sm text-green-600 mt-1 font-medium"
+                      className="text-sm text-green-600 mt-2 font-medium"
                       aria-label={`Save ${savingsInfo.savings} rupees with yearly billing`}
                     >
                       Save {savingsInfo.percentage}% (₹{savingsInfo.savings.toLocaleString('en-IN')})

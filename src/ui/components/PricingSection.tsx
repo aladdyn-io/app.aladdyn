@@ -21,15 +21,16 @@ interface PricingPlan {
   freeChats: number | null;
   hasAnalytics: boolean;
   hasLeads: boolean;
+  discountPercentage: number | null;
 }
 
 const getPlanDescription = (name: string): string => {
   const descriptions: Record<string, string> = {
     freemium: 'Perfect for getting started',
-    basic: 'Great for small projects',
-    ecommerce: 'Perfect for online stores',
-    pro: 'Most popular for growing teams',
-    enterprise: 'Advanced features for large teams',
+    basic: 'Ideal for small businesses',
+    ecommerce: 'Built for online stores',
+    pro: 'For growing teams',
+    enterprise: 'Enterprise solutions',
   };
   return descriptions[name] || '';
 };
@@ -39,18 +40,18 @@ const getPlanFeatures = (plan: PricingPlan): string[] => {
   
   // Apps
   if (plan.maxApps === 999) {
-    features.push('Unlimited Apps');
+    features.push('Unlimited apps');
   } else {
-    features.push(`${plan.maxApps} ${plan.appType} App${plan.maxApps > 1 ? 's' : ''}`);
+    features.push(`${plan.maxApps} ${plan.appType} app${plan.maxApps > 1 ? 's' : ''}`);
   }
   
   // Pages
   if (plan.maxPages === 9999) {
-    features.push('Unlimited Page Scraping');
+    features.push('Unlimited pages scraping');
   } else if (plan.maxApps > 1) {
-    features.push(`${plan.maxPages / plan.maxApps} Pages Scraping Each`);
+    features.push(`${plan.maxPages / plan.maxApps} pages scraping each`);
   } else {
-    features.push(`${plan.maxPages} Page${plan.maxPages > 1 ? 's' : ''} Scraping`);
+    features.push(`${plan.maxPages} pages scraping`);
   }
   
   // Shopify
@@ -71,9 +72,13 @@ const getPlanFeatures = (plan: PricingPlan): string[] => {
   
   // Analytics and leads
   if (plan.hasAnalytics && plan.hasLeads) {
-    features.push('Analytics and Leads');
+    features.push('Will have analytics');
+    features.push('Will have leads');
+  } else if (plan.hasAnalytics) {
+    features.push('Will have analytics');
+    features.push('No leads');
   } else if (plan.hasLeads) {
-    features.push('Leads tracking');
+    features.push('Will have leads');
     features.push('No analytics');
   } else {
     features.push('No analytics and leads');
@@ -88,6 +93,7 @@ export const PricingSection: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeSubscription, setActiveSubscription] = useState<any>(null);
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
+  const [isYearly, setIsYearly] = useState(false);
 
   const { initiatePayment } = useRazorpayCheckout({
     planId: selectedPlan?.id || '',
@@ -111,12 +117,7 @@ export const PricingSection: React.FC = () => {
     try {
       const response = await api.getPricingPlans();
       if (response.success && response.data) {
-        // Sort plans: Freemium, Basic, Ecommerce, Pro, then Enterprise last
-        const sortedPlans = (response.data as PricingPlan[]).sort((a: PricingPlan, b: PricingPlan) => {
-          const order = ['freemium', 'basic', 'ecommerce', 'pro', 'enterprise'];
-          return order.indexOf(a.name) - order.indexOf(b.name);
-        });
-        setPlans(sortedPlans);
+        setPlans(response.data as PricingPlan[]);
       }
     } catch (error) {
       console.error('Error fetching plans:', error);
@@ -188,7 +189,54 @@ export const PricingSection: React.FC = () => {
   const formatPrice = (plan: PricingPlan): string => {
     if (plan.price === 0) return 'Free';
     if (plan.price === -1 || plan.name === 'enterprise') return 'Contact';
-    return `₹${plan.price}/${plan.interval === 'yearly' ? 'year' : 'month'}`;
+    return `₹${plan.price.toLocaleString('en-IN')}/${plan.interval === 'yearly' ? 'year' : 'month'}`;
+  };
+
+  const calculateSavings = (monthlyPlan: PricingPlan, yearlyPlan: PricingPlan) => {
+    const monthlyYearlyTotal = monthlyPlan.price * 12;
+    const yearlyPrice = yearlyPlan.price;
+    const savings = monthlyYearlyTotal - yearlyPrice;
+    const percentage = Math.round((savings / monthlyYearlyTotal) * 100);
+    return { savings, percentage };
+  };
+
+  // Get the display plans based on the toggle
+  const getDisplayPlans = () => {
+    // Base plan order
+    const basePlanOrder = ['freemium', 'basic', 'ecommerce', 'pro', 'enterprise'];
+    
+    // Separate monthly and yearly plans
+    const monthlyPlans = plans.filter(p => p.interval === 'monthly');
+    const yearlyPlans = plans.filter(p => p.interval === 'yearly');
+    
+    // Create a map for easy lookup
+    const monthlyMap = new Map(monthlyPlans.map(p => [p.name, p]));
+    const yearlyMap = new Map(yearlyPlans.map(p => [p.name.replace('-yearly', ''), p]));
+    
+    // Build the display plans array
+    return basePlanOrder.map(baseName => {
+      const monthlyPlan = monthlyMap.get(baseName);
+      const yearlyPlan = yearlyMap.get(baseName);
+      
+      if (isYearly && yearlyPlan) {
+        return yearlyPlan;
+      }
+      return monthlyPlan;
+    }).filter(Boolean) as PricingPlan[];
+  };
+
+  const displayPlans = getDisplayPlans();
+
+  // Get savings info for yearly plans
+  const getSavingsInfo = (plan: PricingPlan) => {
+    if (!isYearly || plan.interval !== 'yearly' || plan.price <= 0) return null;
+    
+    const baseName = plan.name.replace('-yearly', '');
+    const monthlyPlan = plans.find(p => p.name === baseName && p.interval === 'monthly');
+    
+    if (!monthlyPlan) return null;
+    
+    return calculateSavings(monthlyPlan, plan);
   };
 
   const getButtonText = (plan: PricingPlan): string => {
@@ -213,27 +261,63 @@ export const PricingSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Find a plan to power your apps
+            Choose Your Plan
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Supports teams of all sizes, with pricing that scales with your needs.
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-8">
+            Select the perfect plan for your needs. Upgrade or downgrade at any time.
           </p>
+          
+          {/* Toggle Switch */}
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <span className={`text-base font-medium ${!isYearly ? 'text-gray-900' : 'text-gray-500'}`}>
+              Monthly
+            </span>
+            <button
+              onClick={() => setIsYearly(!isYearly)}
+              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
+                isYearly ? 'bg-emerald-600' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                  isYearly ? 'translate-x-7' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className={`text-base font-medium ${isYearly ? 'text-gray-900' : 'text-gray-500'}`}>
+              Yearly
+            </span>
+          </div>
+          
+          {isYearly && (
+            <p className="text-emerald-600 font-semibold text-sm">
+              Save 10% with annual billing
+            </p>
+          )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {plans.map((plan) => (
-            <PricingCard
-              key={plan.id}
-              title={plan.displayName}
-              description={getPlanDescription(plan.name)}
-              price={formatPrice(plan)}
-              features={getPlanFeatures(plan)}
-              buttonText={getButtonText(plan)}
-              isPopular={plan.name === 'pro'}
-              onButtonClick={() => handlePlanSelect(plan)}
-              isCurrentPlan={activeSubscription && activeSubscription.planId === plan.id}
-            />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          {displayPlans.map((plan) => {
+            const savingsInfo = getSavingsInfo(plan);
+            const baseName = plan.name.replace('-yearly', '');
+            const isYearlyPlan = plan.interval === 'yearly';
+            
+            return (
+              <PricingCard
+                key={plan.id}
+                title={plan.displayName.replace(' - Annual', '')}
+                description={getPlanDescription(baseName)}
+                price={formatPrice(plan)}
+                features={getPlanFeatures(plan)}
+                buttonText={getButtonText(plan)}
+                isPopular={baseName === 'pro'}
+                onButtonClick={() => handlePlanSelect(plan)}
+                isCurrentPlan={activeSubscription && activeSubscription.planId === plan.id}
+                badge={isYearlyPlan && plan.discountPercentage ? `${plan.discountPercentage}% off` : undefined}
+                savings={savingsInfo ? `Save ${savingsInfo.percentage}% (₹${savingsInfo.savings.toLocaleString('en-IN')})` : undefined}
+              />
+            );
+          })}
         </div>
 
         {activeSubscription && (

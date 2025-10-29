@@ -44,13 +44,7 @@ export function PricingSectionNew() {
       const data = await response.json()
       
       if (data.success) {
-        // Sort plans by price (excluding -1 for Enterprise)
-        const sortedPlans = data.data.sort((a: PricingPlan, b: PricingPlan) => {
-          if (a.price === -1) return 1 // Enterprise goes last
-          if (b.price === -1) return -1
-          return a.price - b.price
-        })
-        setPricingPlans(sortedPlans)
+        setPricingPlans(data.data)
       } else {
         setError(data.error || 'Failed to fetch pricing plans')
       }
@@ -60,6 +54,50 @@ export function PricingSectionNew() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Get the display plans based on toggle
+  const getDisplayPlans = () => {
+    const basePlanOrder = ['freemium', 'basic', 'ecommerce', 'pro', 'enterprise']
+    
+    // Separate monthly and yearly plans
+    const monthlyPlans = pricingPlans.filter(p => p.interval === 'monthly')
+    const yearlyPlans = pricingPlans.filter(p => p.interval === 'yearly')
+    
+    // Create maps for easy lookup
+    const monthlyMap = new Map(monthlyPlans.map(p => [p.name, p]))
+    const yearlyMap = new Map(yearlyPlans.map(p => [p.name.replace('-yearly', ''), p]))
+    
+    // Build display plans array in correct order
+    return basePlanOrder.map(baseName => {
+      const monthlyPlan = monthlyMap.get(baseName)
+      const yearlyPlan = yearlyMap.get(baseName)
+      
+      if (isYearly && yearlyPlan) {
+        return yearlyPlan
+      }
+      return monthlyPlan
+    }).filter(Boolean) as PricingPlan[]
+  }
+
+  const displayPlans = getDisplayPlans()
+
+  const calculateSavings = (monthlyPrice: number, yearlyPrice: number) => {
+    const monthlyYearlyTotal = monthlyPrice * 12
+    const savings = monthlyYearlyTotal - yearlyPrice
+    const percentage = Math.round((savings / monthlyYearlyTotal) * 100)
+    return { savings, percentage }
+  }
+
+  const getSavingsInfo = (plan: PricingPlan) => {
+    if (!isYearly || plan.interval !== 'yearly' || plan.price <= 0) return null
+    
+    const baseName = plan.name.replace('-yearly', '')
+    const monthlyPlan = pricingPlans.find(p => p.name === baseName && p.interval === 'monthly')
+    
+    if (!monthlyPlan) return null
+    
+    return calculateSavings(monthlyPlan.price, plan.price)
   }
 
   const getPlanFeatures = (plan: PricingPlan) => {
@@ -123,27 +161,7 @@ export function PricingSectionNew() {
     if (plan.price === -1) {
       return 'Contact'
     }
-    
-    if (isYearly) {
-      // Calculate yearly price with 2 months free (17% discount)
-      const yearlyPrice = Math.round(plan.price * 10) // 10 months instead of 12
-      return `₹${yearlyPrice}`
-    }
-    
-    return `₹${plan.price}`
-  }
-
-  const getYearlyDiscount = (plan: PricingPlan) => {
-    if (plan.price === -1 || !isYearly) {
-      return null
-    }
-    
-    const monthlyYearly = plan.price * 12
-    const discountedYearly = Math.round(plan.price * 10)
-    const savings = monthlyYearly - discountedYearly
-    const percentage = Math.round((savings / monthlyYearly) * 100)
-    
-    return { savings, percentage }
+    return `₹${plan.price.toLocaleString('en-IN')}`
   }
 
   if (loading) {
@@ -215,8 +233,8 @@ export function PricingSectionNew() {
             </div>
             <div className="min-h-[24px] flex justify-center">
               {isYearly && (
-                <Badge variant="secondary" aria-label="17% savings with yearly billing">
-                  Save 17%
+                <Badge variant="secondary" aria-label="10% savings with yearly billing">
+                  Save 10% with annual billing
                 </Badge>
               )}
             </div>
@@ -225,21 +243,26 @@ export function PricingSectionNew() {
 
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto" role="list" aria-label="Pricing plans">
-          {pricingPlans.map((plan, index) => (
+          {displayPlans.map((plan, index) => {
+            const savingsInfo = getSavingsInfo(plan)
+            const baseName = plan.name.replace('-yearly', '')
+            const isYearlyPlan = plan.interval === 'yearly'
+            
+            return (
             <Card
-              key={plan.name}
-              className={`relative flex flex-col h-[600px] ${plan.name === 'pro' ? "border-primary shadow-lg scale-105" : ""}`}
+              key={plan.id}
+              className={`relative flex flex-col h-[600px] ${baseName === 'pro' ? "border-primary shadow-lg scale-105" : ""}`}
               role="listitem"
               aria-labelledby={`plan-${index}-title`}
               aria-describedby={`plan-${index}-description plan-${index}-price`}
             >
-              {plan.name === 'pro' && (
+              {baseName === 'pro' && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2" aria-label="Most popular plan">
                   Most Popular
                 </Badge>
               )}
               
-              {plan.discountPercentage && plan.discountPercentage > 0 && (
+              {isYearlyPlan && plan.discountPercentage && plan.discountPercentage > 0 && (
                 <Badge className="absolute -top-3 right-4 bg-green-500" aria-label={`${plan.discountPercentage}% discount`}>
                   {plan.discountPercentage}% off
                 </Badge>
@@ -247,51 +270,36 @@ export function PricingSectionNew() {
 
               <CardHeader className="text-center pb-8">
                 <CardTitle className="text-2xl font-bold" id={`plan-${index}-title`}>
-                  {plan.displayName}
+                  {plan.displayName.replace(' - Annual', '')}
                 </CardTitle>
                 <CardDescription className="text-balance" id={`plan-${index}-description`}>
-                  {plan.name === 'freemium' ? 'Perfect for getting started' :
-                   plan.name === 'basic' ? 'Ideal for small businesses' :
-                   plan.name === 'ecommerce' ? 'Built for online stores' :
-                   plan.name === 'pro' ? 'For growing teams' :
+                  {baseName === 'freemium' ? 'Perfect for getting started' :
+                   baseName === 'basic' ? 'Ideal for small businesses' :
+                   baseName === 'ecommerce' ? 'Built for online stores' :
+                   baseName === 'pro' ? 'For growing teams' :
                    'Enterprise solutions'}
                 </CardDescription>
                 <div className="mt-4" id={`plan-${index}-price`}>
                   <span
                     className="text-4xl font-bold"
-                    aria-label={`${getDisplayPrice(plan)} per ${isYearly ? 'year' : plan.interval}`}
+                    aria-label={`${getDisplayPrice(plan)} per ${plan.interval === 'yearly' ? 'year' : plan.interval}`}
                   >
                     {getDisplayPrice(plan)}
                   </span>
                   {plan.price !== -1 && (
                     <span className="text-muted-foreground" aria-hidden="true">
-                      /{isYearly ? 'year' : plan.interval}
+                      /{plan.interval === 'yearly' ? 'year' : plan.interval}
                     </span>
                   )}
                   
-                  {/* Show plan-specific discount */}
-                  {plan.discountPercentage && plan.discountPercentage > 0 && !isYearly && (
+                  {/* Show yearly savings */}
+                  {savingsInfo && (
                     <div
                       className="text-sm text-green-600 mt-1 font-medium"
-                      aria-label={`${plan.discountPercentage}% discount applied`}
+                      aria-label={`Save ${savingsInfo.savings} rupees with yearly billing`}
                     >
-                      Save {plan.discountPercentage}%
+                      Save {savingsInfo.percentage}% (₹{savingsInfo.savings.toLocaleString('en-IN')})
                     </div>
-                  )}
-                  
-                  {/* Show yearly savings */}
-                  {isYearly && plan.price !== -1 && (
-                    (() => {
-                      const yearlyDiscount = getYearlyDiscount(plan)
-                      return yearlyDiscount && (
-                        <div
-                          className="text-sm text-green-600 mt-1 font-medium"
-                          aria-label={`Save ${yearlyDiscount.savings} rupees with yearly billing`}
-                        >
-                          Save {yearlyDiscount.percentage}% (₹{yearlyDiscount.savings})
-                        </div>
-                      )
-                    })()
                   )}
                 </div>
               </CardHeader>
@@ -310,11 +318,11 @@ export function PricingSectionNew() {
               <CardFooter>
                 <Button
                   className={`w-full ${
-                    plan.name !== 'pro'
+                    baseName !== 'pro'
                       ? "dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:border-gray-600"
                       : ""
                   }`}
-                  variant={plan.name === 'pro' ? "default" : "outline"}
+                  variant={baseName === 'pro' ? "default" : "outline"}
                   size="lg"
                   aria-label={`Get started with ${plan.displayName} plan for ${getDisplayPrice(plan)} per ${plan.interval}`}
                   onClick={() => {
@@ -331,7 +339,8 @@ export function PricingSectionNew() {
                 </Button>
               </CardFooter>
             </Card>
-          ))}
+            )
+          })}
         </div>
 
         {/* Footer */}

@@ -10,6 +10,8 @@ interface PricingCardProps {
   isPopular?: boolean;
   isCurrentPlan?: boolean;
   onButtonClick: () => void;
+  badge?: string;
+  savings?: string;
 }
 
 export const PricingCard: React.FC<PricingCardProps> = ({
@@ -20,7 +22,9 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   buttonText,
   isPopular = false,
   isCurrentPlan = false,
-  onButtonClick
+  onButtonClick,
+  badge,
+  savings
 }) => {
   return (
     <div className={`relative bg-white rounded-xl border shadow-sm p-6 h-full flex flex-col ${
@@ -30,25 +34,32 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         ? 'border-blue-200 ring-2 ring-blue-100'
         : 'border-gray-200'
     }`}>
-      {isPopular && !isCurrentPlan && (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-            Popular
+      {/* Badges at top */}
+      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2">
+        {isPopular && !isCurrentPlan && (
+          <span className="bg-gray-900 text-white px-3 py-1 rounded-full text-xs font-medium">
+            Most Popular
           </span>
-        </div>
-      )}
-      {isCurrentPlan && (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+        )}
+        {isCurrentPlan && (
           <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
             Current Plan
           </span>
-        </div>
-      )}
+        )}
+        {badge && !isCurrentPlan && (
+          <span className="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+            {badge}
+          </span>
+        )}
+      </div>
       
       <div className="text-center mb-6">
         <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
         <p className="text-gray-600 text-sm mb-4">{description}</p>
-        <div className="text-3xl font-bold text-gray-900">{price}</div>
+        <div className="text-3xl font-bold text-gray-900 mb-2">{price}</div>
+        {savings && (
+          <p className="text-emerald-600 text-sm font-medium">{savings}</p>
+        )}
       </div>
       
       <ul className="space-y-3 mb-6 flex-grow">

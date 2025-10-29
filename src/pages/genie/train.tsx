@@ -655,10 +655,10 @@ export function TrainGenie() {
                         setUploadError('Only PDF and DOCX files are allowed.');
                         continue;
                       }
-                      if (file.size > 5 * 1024 * 1024) {
-                        setUploadError('Each file must be less than 5MB.');
-                        continue;
-                      }
+                      // if (file.size > 5 * 1024 * 1024) {
+                      //   setUploadError('Each file must be less than 5MB.');
+                      //   continue;
+                      // }
                       validFiles.push(file);
                     }
                     setSelectedFiles(validFiles);

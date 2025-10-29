@@ -3,10 +3,9 @@ import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MessageSquare, Plus, X, Save, Loader2, Target } from 'lucide-react';
+import { MessageSquare, Save, Loader2, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { getUserId } from '@/lib/utils';
 
@@ -14,10 +13,6 @@ interface AdminPrompt {
   id: string;
   value: string;
   tag: string;
-  qualities: {
-    id: string;
-    value: string;
-  }[];
 }
 
 
@@ -26,12 +21,10 @@ export function GeniePrompts() {
   const [endGoal, setEndGoal] = useState<string>('all');
   const [adminPrompts, setAdminPrompts] = useState<AdminPrompt[]>([]);
   const [customPrompt, setCustomPrompt] = useState('');
-  const [customQualities, setCustomQualities] = useState<string[]>([]);
-  const [newQuality, setNewQuality] = useState('');
-  const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
+  const [selectedPromptValue, setSelectedPromptValue] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [currentPrompt, setCurrentPrompt] = useState<{ value: string; tag: string; isCustom: boolean; qualities: string[] } | null>(null);
+  const [currentPrompt, setCurrentPrompt] = useState<{ value: string; isCustom: boolean } | null>(null);
 
   useEffect(() => {
     if (genieId) {
@@ -82,16 +75,18 @@ export function GeniePrompts() {
         if (data.success && data.data) {
           setCurrentPrompt({
             value: data.data.value,
-            tag: data.data.tag,
-            isCustom: data.data.isCustom,
-            qualities: data.data.qualities || []
+            isCustom: data.data.isCustom
           });
           
           if (data.data.isCustom) {
+            // Show custom prompt in text area
             setCustomPrompt(data.data.value);
-            setCustomQualities(data.data.qualities || []);
+            setSelectedPromptValue(null);
           } else {
-            setSelectedPromptId(data.data.promptId);
+            // Clear custom prompt text area when default is selected
+            setCustomPrompt('');
+            // Store the prompt value to match with template prompts
+            setSelectedPromptValue(data.data.value);
           }
         }
       }
@@ -100,7 +95,7 @@ export function GeniePrompts() {
     }
   };
 
-  const handleSelectAdminPrompt = async (promptId: string) => {
+  const handleSelectAdminPrompt = async (promptId: string, promptValue: string) => {
     if (!genieId) return;
     
     setIsSaving(true);
@@ -123,10 +118,12 @@ export function GeniePrompts() {
         throw new Error('Failed to save prompt');
       }
 
-      setSelectedPromptId(promptId);
+      // Store the prompt value (not ID) to match with the stored prompt
+      setSelectedPromptValue(promptValue);
       setCustomPrompt('');
-      setCustomQualities([]);
       toast.success('Admin prompt selected successfully');
+      // Refresh the current prompt display
+      fetchGeniePrompt();
     } catch (error) {
       console.error('Failed to save admin prompt:', error);
       toast.error('Failed to save prompt');
@@ -162,7 +159,6 @@ export function GeniePrompts() {
           genieId: genieId,
           userId: userId,
           customPrompt: customPrompt.trim(),
-          qualities: customQualities,
         }),
       });
 
@@ -170,7 +166,7 @@ export function GeniePrompts() {
         throw new Error('Failed to save custom prompt');
       }
 
-      setSelectedPromptId(null);
+      setSelectedPromptValue(null);
       toast.success('Custom prompt saved successfully');
       // Refresh the current prompt
       fetchGeniePrompt();
@@ -180,17 +176,6 @@ export function GeniePrompts() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const addQuality = () => {
-    if (newQuality.trim() && !customQualities.includes(newQuality.trim())) {
-      setCustomQualities([...customQualities, newQuality.trim()]);
-      setNewQuality('');
-    }
-  };
-
-  const removeQuality = (quality: string) => {
-    setCustomQualities(customQualities.filter(q => q !== quality));
   };
 
   if (!genieId) {
@@ -273,9 +258,6 @@ export function GeniePrompts() {
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Badge className="bg-blue-600 text-white">Current Prompt</Badge>
-                <Badge variant="outline" className="bg-white">
-                  {currentPrompt.tag}
-                </Badge>
                 {currentPrompt.isCustom && (
                   <Badge variant="outline" className="bg-yellow-100 text-yellow-700 border-yellow-300">
                     Custom
@@ -283,19 +265,7 @@ export function GeniePrompts() {
                 )}
               </div>
             </div>
-            <p className="text-sm text-gray-700 mb-3 leading-relaxed">{currentPrompt.value}</p>
-            {currentPrompt.qualities && currentPrompt.qualities.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {currentPrompt.qualities.map((quality, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 text-xs bg-white text-gray-700 rounded-full border border-blue-200"
-                  >
-                    {quality}
-                  </span>
-                ))}
-              </div>
-            )}
+            <p className="text-sm text-gray-700 leading-relaxed">{currentPrompt.value}</p>
           </CardContent>
         </Card>
       )}
@@ -310,39 +280,24 @@ export function GeniePrompts() {
               <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
             </div>
           ) : (
-            <div className="space-y-3 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
+            <div className="space-y-3 max-h-[calc(100vh-16rem)] overflow-y-auto pr-1">
               {adminPrompts.map((prompt) => (
                 <Card
                   key={prompt.id}
                   className={`cursor-pointer transition-all ${
-                    selectedPromptId === prompt.id 
-                      ? 'ring-2 ring-blue-500 bg-blue-50' 
+                    selectedPromptValue === prompt.value 
+                      ? 'border-2 border-blue-500 bg-blue-50' 
                       : 'hover:border-blue-300'
                   }`}
-                  onClick={() => handleSelectAdminPrompt(prompt.id)}
+                  onClick={() => handleSelectAdminPrompt(prompt.id, prompt.value)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-                        {prompt.tag}
-                      </Badge>
-                      {selectedPromptId === prompt.id && (
+                    <div className="flex items-end justify-end mb-2">
+                      {selectedPromptValue === prompt.value && (
                         <Badge className="bg-blue-600 text-white">Selected</Badge>
                       )}
                     </div>
-                    <p className="text-sm text-gray-700 mb-3 leading-relaxed">{prompt.value}</p>
-                    {prompt.qualities && prompt.qualities.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {prompt.qualities.map((quality) => (
-                          <span
-                            key={quality.id}
-                            className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full"
-                          >
-                            {quality.value}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    <p className="text-sm text-gray-700 leading-relaxed">{prompt.value}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -367,61 +322,11 @@ export function GeniePrompts() {
                   onChange={(e) => {
                     setCustomPrompt(e.target.value);
                     if (e.target.value.trim()) {
-                      setSelectedPromptId(null);
+                      setSelectedPromptValue(null);
                     }
                   }}
-                  className="w-full min-h-[200px] p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full min-h-[300px] p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-900 mb-2 block">
-                  Qualities
-                </Label>
-                
-                {/* Add Quality Input */}
-                <div className="flex gap-2 mb-3">
-                  <Input
-                    placeholder="Add a quality (e.g., Professional, Friendly)"
-                    value={newQuality}
-                    onChange={(e) => setNewQuality(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addQuality();
-                      }
-                    }}
-                  />
-                  <Button
-                    onClick={addQuality}
-                    size="sm"
-                    variant="outline"
-                    className="flex-shrink-0"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Quality Tags */}
-                {customQualities.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {customQualities.map((quality, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="bg-blue-100 text-blue-700 pr-1"
-                      >
-                        {quality}
-                        <button
-                          onClick={() => removeQuality(quality)}
-                          className="ml-1.5 hover:bg-blue-200 rounded-full p-0.5"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <Button

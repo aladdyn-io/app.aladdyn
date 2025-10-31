@@ -67,7 +67,11 @@ export function Login() {
   // Social auth handler
   const handleSocial = (provider: 'google' | 'github') => {
     setError(null)
-    console.log('Social auth not implemented:', provider)
+    setIsAuthenticating(true)
+    
+    // Redirect to backend OAuth endpoint
+    const backendUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:3001'
+    window.location.href = `${backendUrl}/api/auth/${provider}`
   }
 
   return (

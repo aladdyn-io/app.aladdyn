@@ -5,6 +5,7 @@ export { Register } from './Register';
 export { Create } from './Create';
 export { Preview } from './Preview';
 export { Pricing } from './Pricing';
+export { OAuthCallback } from './OAuthCallback';
 export { default as Widget } from './Widget';
 export { default as DashboardV2 } from './DashboardV2';
 

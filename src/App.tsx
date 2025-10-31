@@ -12,6 +12,7 @@ import {
   Create,
   Preview,
   Pricing,
+  OAuthCallback,
   GenieDashboard,
   GenieAnalytics,
   GeniePlayground,
@@ -41,6 +42,7 @@ function App() {
         {/* Public pages - redirect to home if already logged in */}
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        <Route path="/auth/callback" element={<OAuthCallback />} />
         
         {/* Create pages without layout */}
         <Route path="/create" element={<Create />} />
